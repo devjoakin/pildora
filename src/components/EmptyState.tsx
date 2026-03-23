@@ -1,10 +1,4 @@
-import {
-  Compass,
-  MessageCircle,
-  Sparkles,
-  Timer,
-  type LucideIcon,
-} from 'lucide-react';
+import { MessageCircle, type LucideIcon } from 'lucide-react';
 
 interface EmptyStateProps {
   icon?: LucideIcon;
@@ -37,7 +31,7 @@ export function EmptyState({
         {description}
       </p>
 
-      <div className="mb-7 grid gap-3 text-left sm:grid-cols-3">
+      {/* <div className="mb-7 grid gap-3 text-left sm:grid-cols-3">
         <article className="rounded-2xl border border-orange-100 bg-white/80 p-3 shadow-sm backdrop-blur">
           <Sparkles className="mb-2 h-4 w-4 text-orange-500" />
           <p className="text-xs font-medium text-slate-800">
@@ -61,7 +55,7 @@ export function EmptyState({
             Resultados y tool-calls en tiempo real.
           </p>
         </article>
-      </div>
+      </div> */}
 
       {suggestions.length > 0 && (
         <div className="flex flex-wrap justify-center gap-2">

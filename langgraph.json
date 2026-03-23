@@ -1,7 +1,10 @@
 {
   "node_version": "22",
   "graphs": {
-    "weatherAgent": "./src\\agents\\weatherAgent.ts:weatherAgent"
+    "weatherAgent": "./src\\agents\\weatherAgent.ts:weatherAgent",
+    "emailAgent": "./src\\agents\\emailAgent.ts:emailAgent",
+    "travelAgent": "./src\\agents\\travelAgent.ts:travelAgent",
+    "githubIssuesAgent": "./src\\agents\\githubIssuesAgent.ts:githubIssuesAgent"
   },
   "env": ".env"
 }

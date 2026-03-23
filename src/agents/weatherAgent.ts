@@ -63,8 +63,6 @@ export const getWeather = tool(
       82: 'Chubascos violentos',
       95: 'Tormenta',
     };
-    console.log('Weather data:');
-    console.log('WEHATER CODE', weather_code);
     const description =
       weatherDescriptions[weather_code] || 'Unknown conditions';
 
@@ -86,5 +84,5 @@ export const weatherAgent = createAgent({
   model,
   tools: [getWeather, tools.webSearch()],
   systemPrompt:
-    'You are a helpful assistant that can answer questions and help with tasks.',
+    'Eres un asistente útil que puede proporcionar información meteorológica actual para cualquier ubicación utilizando la herramienta get_weather, y también puede realizar búsquedas web si es necesario.',
 });

@@ -25,3 +25,8 @@ dist-ssr
 
 # LangGraph API
 .langgraph_api
+
+# Environment files
+.env
+.env.*
+!.env.example

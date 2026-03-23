@@ -1,30 +1,30 @@
-import { Brain } from "lucide-react";
-import type { ContentBlock } from "langchain";
-import type { Message } from "@langchain/langgraph-sdk";
+import { Brain } from 'lucide-react';
+import type { ContentBlock } from 'langchain';
+import type { Message } from '@langchain/langgraph-sdk';
 
 // Styles for each message type - kept separate for readability
 const BUBBLE_STYLES = {
   human:
-    "bg-foreground text-white rounded-2xl px-4 py-2.5 ml-auto max-w-[85%] md:max-w-[70%] w-fit",
+    'bg-slate-200/85 text-slate-800 border border-slate-300/70 rounded-2xl px-4 py-2.5 ml-auto max-w-[85%] md:max-w-[70%] w-fit',
   system:
-    "bg-chart-5 border border-amber-500/20 text-green rounded-lg px-4 py-3",
-  ai: "bg-chart-5 text-black-100 rounded-2xl px-4 py-2.5",
+    'bg-amber-50/80 border border-amber-200 text-slate-700 rounded-lg px-4 py-3',
+  ai: 'bg-orange-50/70 border border-orange-200/80 text-slate-800 rounded-2xl px-4 py-2.5',
 } as const;
 
 /**
  * Extract text content from a message
  */
 function getTextContent(message: Message): string {
-  if (typeof message.content === "string") {
+  if (typeof message.content === 'string') {
     return message.content;
   }
   if (Array.isArray(message.content)) {
     return message.content
-      .filter((c): c is { type: "text"; text: string } => c.type === "text")
+      .filter((c): c is { type: 'text'; text: string } => c.type === 'text')
       .map((c) => c.text)
-      .join("");
+      .join('');
   }
-  return "";
+  return '';
 }
 
 /**
@@ -37,15 +37,15 @@ export function MessageBubble({ message }: { message: Message }) {
   /**
    * Don't render tool messages as render them separately
    */
-  if (message.type === "tool") {
+  if (message.type === 'tool') {
     return null;
   }
 
-  if (message.type === "system") {
+  if (message.type === 'system') {
     return <SystemBubble content={content} />;
   }
 
-  if (message.type === "human") {
+  if (message.type === 'human') {
     return <HumanBubble content={content} />;
   }
 
@@ -96,7 +96,7 @@ function AssistantBubble({ message }: { message: Message }) {
       {reasoning && <ReasoningBubble content={reasoning} />}
       {content && (
         <div className="animate-fade-in">
-          <div className="text-xs font-medium text-black-500 mb-2">
+          <div className="text-xs font-medium text-slate-500 mb-2">
             Assistant
           </div>
           <div className={BUBBLE_STYLES.ai}>
@@ -167,15 +167,15 @@ export function getReasoningFromMessage(message: Message): string | undefined {
     const reasoningContent = (message.content as ContentBlock[])
       .filter(
         (block): block is ContentBlock.Reasoning =>
-          typeof block === "object" &&
+          typeof block === 'object' &&
           block !== null &&
-          "type" in block &&
-          block.type === "reasoning" &&
-          "reasoning" in block &&
-          typeof block.reasoning === "string"
+          'type' in block &&
+          block.type === 'reasoning' &&
+          'reasoning' in block &&
+          typeof block.reasoning === 'string',
       )
       .map((block) => block.reasoning)
-      .join("");
+      .join('');
 
     if (reasoningContent.trim()) {
       return reasoningContent;

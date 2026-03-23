@@ -1,14 +1,18 @@
 import {
   Cloud,
+  FileSearch,
+  Github,
+  Mail,
   Loader2,
   MapPin,
+  Send,
   Wind,
   Droplets,
   Sun,
   CloudRain,
   Snowflake,
   CloudLightning,
-  CloudCog
+  CloudCog,
 } from 'lucide-react';
 import type { ToolMessage } from '@langchain/langgraph-sdk';
 import type {
@@ -18,8 +22,24 @@ import type {
   InferAgentToolCalls,
 } from '@langchain/langgraph-sdk/react';
 import type {
+  emailAgent as EmailToolCallingAgent,
+  searchCurriculum,
+  sendEmail,
+} from '../agents/emailAgent';
+import type {
+  askPlannerSpecialist,
+  askWeatherSpecialist,
+  emailTripPlan,
+  travelAgent as TravelToolCallingAgent,
+} from '../agents/travelAgent';
+import type {
+  createGithubIssue,
+  githubIssuesAgent as GithubIssuesToolCallingAgent,
+  searchGithubIssues,
+} from '../agents/githubIssuesAgent';
+import type {
   getWeather,
-  weatherAgent as ToolCallingAgent,
+  weatherAgent as WeatherToolCallingAgent,
 } from '../agents/weatherAgent';
 
 /**
@@ -42,9 +62,37 @@ export type AgentToolCalls = WithLiteralName<
    */
   | ToolCallFromTool<typeof getWeather>
   /**
-   * Infer tool call from an agent instance
+   * Infer tool call from the sendEmail tool
    */
-  | InferAgentToolCalls<typeof ToolCallingAgent>
+  | ToolCallFromTool<typeof sendEmail>
+  /**
+   * Infer tool call from travel subagent tools
+   */
+  | ToolCallFromTool<typeof askWeatherSpecialist>
+  | ToolCallFromTool<typeof askPlannerSpecialist>
+  | ToolCallFromTool<typeof emailTripPlan>
+  | ToolCallFromTool<typeof searchGithubIssues>
+  | ToolCallFromTool<typeof createGithubIssue>
+  /**
+   * Infer tool call from the searchCurriculum tool
+   */
+  | ToolCallFromTool<typeof searchCurriculum>
+  /**
+   * Infer tool call from weather agent instance
+   */
+  | InferAgentToolCalls<typeof WeatherToolCallingAgent>
+  /**
+   * Infer tool call from email agent instance
+   */
+  | InferAgentToolCalls<typeof EmailToolCallingAgent>
+  /**
+   * Infer tool call from travel agent instance
+   */
+  | InferAgentToolCalls<typeof TravelToolCallingAgent>
+  /**
+   * Infer tool call from GitHub issues agent instance
+   */
+  | InferAgentToolCalls<typeof GithubIssuesToolCallingAgent>
 >;
 
 /**
@@ -75,7 +123,224 @@ export function ToolCallCard({
 }) {
   const { call, result, state } = toolCall;
 
+  if (call.name === 'send_email') {
+    return <EmailToolCallCard call={call} result={result} state={state} />;
+  }
+
+  if (call.name === 'search_curriculum') {
+    return <CvSearchToolCallCard call={call} result={result} state={state} />;
+  }
+
+  if (
+    call.name === 'ask_weather_specialist' ||
+    call.name === 'ask_planner_specialist' ||
+    call.name === 'email_trip_plan'
+  ) {
+    return <TravelToolCallCard call={call} result={result} state={state} />;
+  }
+
+  if (
+    call.name === 'search_github_issues' ||
+    call.name === 'create_github_issue'
+  ) {
+    return (
+      <GithubIssueToolCallCard call={call} result={result} state={state} />
+    );
+  }
+
   return <WeatherToolCallCard call={call} result={result} state={state} />;
+}
+
+function TravelToolCallCard({
+  call,
+  result,
+  state,
+}: {
+  call:
+    | ToolCallFromTool<typeof askWeatherSpecialist>
+    | ToolCallFromTool<typeof askPlannerSpecialist>
+    | ToolCallFromTool<typeof emailTripPlan>;
+  result?: ToolMessage;
+  state: ToolCallState;
+}) {
+  const isLoading = state === 'pending';
+  const parsedResult = parseToolResult(result);
+  const isError = parsedResult.status === 'error';
+
+  const labelByTool: Record<typeof call.name, string> = {
+    ask_weather_specialist: 'Subagente clima',
+    ask_planner_specialist: 'Subagente planner',
+    email_trip_plan: 'Subagente email',
+  };
+
+  return (
+    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm animate-fade-in">
+      <div className="mb-3 flex items-center gap-2 text-xs text-slate-500">
+        <MapPin className="h-4 w-4 text-slate-700" />
+        <span className="font-medium text-slate-700">
+          {labelByTool[call.name]}
+        </span>
+        {isLoading && <Loader2 className="ml-auto h-3.5 w-3.5 animate-spin" />}
+      </div>
+
+      <p className="text-sm text-slate-600 break-words">
+        <span className="font-medium text-slate-800">Tool:</span> {call.name}
+      </p>
+
+      {parsedResult.content && (
+        <div
+          className={`mt-3 rounded-lg border px-3 py-2 text-sm ${
+            isError
+              ? 'border-red-200 bg-red-50 text-red-700'
+              : 'border-emerald-200 bg-emerald-50 text-emerald-700'
+          }`}
+        >
+          <span>{parsedResult.content}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function GithubIssueToolCallCard({
+  call,
+  result,
+  state,
+}: {
+  call:
+    | ToolCallFromTool<typeof searchGithubIssues>
+    | ToolCallFromTool<typeof createGithubIssue>;
+  result?: ToolMessage;
+  state: ToolCallState;
+}) {
+  const isLoading = state === 'pending';
+  const parsedResult = parseToolResult(result);
+  const isError = parsedResult.status === 'error';
+
+  const label =
+    call.name === 'search_github_issues'
+      ? 'Busqueda de issues'
+      : 'Creacion de issue';
+
+  return (
+    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm animate-fade-in">
+      <div className="mb-3 flex items-center gap-2 text-xs text-slate-500">
+        <Github className="h-4 w-4 text-slate-700" />
+        <span className="font-medium text-slate-700">{label}</span>
+        {isLoading && <Loader2 className="ml-auto h-3.5 w-3.5 animate-spin" />}
+      </div>
+
+      <p className="text-sm text-slate-600 break-words">
+        <span className="font-medium text-slate-800">Tool:</span> {call.name}
+      </p>
+
+      {parsedResult.content && (
+        <div
+          className={`mt-3 rounded-lg border px-3 py-2 text-sm ${
+            isError
+              ? 'border-red-200 bg-red-50 text-red-700'
+              : 'border-emerald-200 bg-emerald-50 text-emerald-700'
+          }`}
+        >
+          <span>{parsedResult.content}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CvSearchToolCallCard({
+  call,
+  result,
+  state,
+}: {
+  call: ToolCallFromTool<typeof searchCurriculum>;
+  result?: ToolMessage;
+  state: ToolCallState;
+}) {
+  const isLoading = state === 'pending';
+  const parsedResult = parseToolResult(result);
+  const isError = parsedResult.status === 'error';
+  const isNotFound = parsedResult.status === 'not_found';
+
+  return (
+    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm animate-fade-in">
+      <div className="mb-3 flex items-center gap-2 text-xs text-slate-500">
+        <FileSearch className="h-4 w-4 text-slate-700" />
+        <span className="font-medium text-slate-700">Busqueda en CV</span>
+        {isLoading && <Loader2 className="ml-auto h-3.5 w-3.5 animate-spin" />}
+      </div>
+
+      <p className="text-sm text-slate-600">
+        <span className="font-medium text-slate-800">Pregunta:</span>{' '}
+        {call.args.question}
+      </p>
+
+      {parsedResult.content && (
+        <div
+          className={`mt-3 rounded-lg border px-3 py-2 text-sm ${
+            isError
+              ? 'border-red-200 bg-red-50 text-red-700'
+              : isNotFound
+                ? 'border-amber-200 bg-amber-50 text-amber-700'
+                : 'border-emerald-200 bg-emerald-50 text-emerald-700'
+          }`}
+        >
+          <span>{parsedResult.content}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function EmailToolCallCard({
+  call,
+  result,
+  state,
+}: {
+  call: ToolCallFromTool<typeof sendEmail>;
+  result?: ToolMessage;
+  state: ToolCallState;
+}) {
+  const isLoading = state === 'pending';
+  const parsedResult = parseToolResult(result);
+  const isError = parsedResult.status === 'error';
+
+  return (
+    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm animate-fade-in">
+      <div className="mb-3 flex items-center gap-2 text-xs text-slate-500">
+        <Mail className="h-4 w-4 text-slate-700" />
+        <span className="font-medium text-slate-700">Envio de email</span>
+        {isLoading && <Loader2 className="ml-auto h-3.5 w-3.5 animate-spin" />}
+      </div>
+
+      <div className="grid gap-1 text-sm">
+        <p className="text-slate-600">
+          <span className="font-medium text-slate-800">Motivo:</span> Pregunta
+          sin respuesta en el CV
+        </p>
+        <p className="text-slate-600">
+          <span className="font-medium text-slate-800">Pregunta:</span>{' '}
+          {call.args.question}
+        </p>
+      </div>
+
+      {parsedResult.content && (
+        <div
+          className={`mt-3 rounded-lg border px-3 py-2 text-sm ${
+            isError
+              ? 'border-red-200 bg-red-50 text-red-700'
+              : 'border-emerald-200 bg-emerald-50 text-emerald-700'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            {!isError && <Send className="h-4 w-4" />}
+            <span>{parsedResult.content}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 /**
@@ -108,7 +373,11 @@ function parseWeatherContent(content: string): {
 function getWeatherIcon(condition: string) {
   const c = condition.toLowerCase();
   console.log('Condition for icon:', c);
-  if (c.includes('lluvia') || c.includes('llovizna') || c.includes('chubasco')) {
+  if (
+    c.includes('lluvia') ||
+    c.includes('llovizna') ||
+    c.includes('chubasco')
+  ) {
     return <CloudRain className="w-8 h-8 text-sky-300" />;
   }
   if (c.includes('nieve')) {
