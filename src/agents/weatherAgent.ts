@@ -1,0 +1,90 @@
+import { createAgent, tool } from 'langchain';
+import { ChatOpenAI, tools } from '@langchain/openai';
+import { z } from 'zod/v4';
+
+const model = new ChatOpenAI({
+  model: 'gpt-4o-mini',
+});
+
+/**
+ * Custom weather tool
+ */
+export const getWeather = tool(
+  async ({ location }) => {
+    // Use Open-Meteo geocoding API to get coordinates
+    const geoResponse = await fetch(
+      `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+        location,
+      )}&count=1`,
+    );
+    const geoData = await geoResponse.json();
+
+    if (!geoData.results?.length) {
+      return JSON.stringify({
+        status: 'error',
+        content: `Could not find location: ${location}`,
+      });
+    }
+
+    const { latitude, longitude, name, country } = geoData.results[0];
+
+    // Fetch weather from Open-Meteo API (no API key required)
+    const weatherResponse = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m`,
+    );
+    const weatherData = await weatherResponse.json();
+
+    const {
+      temperature_2m,
+      weather_code,
+      wind_speed_10m,
+      relative_humidity_2m,
+    } = weatherData.current;
+
+    // Map weather codes to descriptions
+    const weatherDescriptions: Record<number, string> = {
+      0: 'Cielo despejado',
+      1: 'Cielo parcialmente despejado',
+      2: 'Parcialmente nublado',
+      3: 'Nublado',
+      45: 'Niebla',
+      48: 'Niebla con depósito de escarcha',
+      51: 'Llovizna ligera',
+      53: 'Llovizna moderada',
+      55: 'Llovizna densa',
+      61: 'Lluvia ligera',
+      63: 'Lluvia moderada',
+      65: 'Lluvia intensa',
+      71: 'Nieve ligera',
+      73: 'Nieve moderada',
+      75: 'Nieve intensa',
+      80: 'Chubascos ligeros',
+      81: 'Chubascos moderados',
+      82: 'Chubascos violentos',
+      95: 'Tormenta',
+    };
+    console.log('Weather data:');
+    console.log('WEHATER CODE', weather_code);
+    const description =
+      weatherDescriptions[weather_code] || 'Unknown conditions';
+
+    return JSON.stringify({
+      status: 'success',
+      content: `Weather in ${name}, ${country}: ${description}, ${temperature_2m}°C, Wind: ${wind_speed_10m} km/h, Humidity: ${relative_humidity_2m}%`,
+    });
+  },
+  {
+    name: 'get_weather',
+    description: 'Get the current weather for a location',
+    schema: z.object({
+      location: z.string().describe('The city or location to get weather for'),
+    }),
+  },
+);
+
+export const weatherAgent = createAgent({
+  model,
+  tools: [getWeather, tools.webSearch()],
+  systemPrompt:
+    'You are a helpful assistant that can answer questions and help with tasks.',
+});

@@ -1,0 +1,7 @@
+{
+  "node_version": "22",
+  "graphs": {
+    "weatherAgent": "./src\\agents\\weatherAgent.ts:weatherAgent"
+  },
+  "env": ".env"
+}
