@@ -3,6 +3,7 @@ import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { AgentSidebar } from './components/AgentSidebar';
 import { EmailAgentPage } from './pages/EmailAgentPage';
 import { GithubIssuesAgentPage } from './pages/GithubIssuesAgentPage';
+import { OccupationSlackAgentPage } from './pages/OccupationSlackAgentPage';
 import { TravelAgentPage } from './pages/TravelAgentPage';
 import { WeatherAgentPage } from './pages/WeatherAgentPage';
 
@@ -41,6 +42,10 @@ function App() {
           <Route
             path="agents/github-issues"
             element={<GithubIssuesAgentPage />}
+          />
+          <Route
+            path="agents/occupation-slack"
+            element={<OccupationSlackAgentPage />}
           />
           <Route path="*" element={<Navigate to="/agents/weather" replace />} />
         </Route>

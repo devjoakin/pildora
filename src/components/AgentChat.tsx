@@ -4,6 +4,7 @@ import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { emailAgent } from '../agents/emailAgent';
 import type { githubIssuesAgent } from '../agents/githubIssuesAgent';
+import type { occupationSlackAgent } from '../agents/occupationSlackAgent';
 import type { travelAgent } from '../agents/travelAgent';
 import type { weatherAgent } from '../agents/weatherAgent';
 import { useStickToBottom } from 'use-stick-to-bottom';
@@ -53,6 +54,7 @@ export function AgentChat({
     | typeof emailAgent
     | typeof travelAgent
     | typeof githubIssuesAgent
+    | typeof occupationSlackAgent
   >({
     assistantId,
     apiUrl: 'http://localhost:2024',

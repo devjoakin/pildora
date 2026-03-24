@@ -4,7 +4,8 @@
     "weatherAgent": "./src\\agents\\weatherAgent.ts:weatherAgent",
     "emailAgent": "./src\\agents\\emailAgent.ts:emailAgent",
     "travelAgent": "./src\\agents\\travelAgent.ts:travelAgent",
-    "githubIssuesAgent": "./src\\agents\\githubIssuesAgent.ts:githubIssuesAgent"
+    "githubIssuesAgent": "./src\\agents\\githubIssuesAgent.ts:githubIssuesAgent",
+    "occupationSlackAgent": "./src\\agents\\occupationSlackAgent.ts:occupationSlackAgent"
   },
   "env": ".env"
 }

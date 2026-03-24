@@ -1,10 +1,18 @@
-import { CloudSun, Github, Mail, Map, type LucideIcon } from 'lucide-react';
+import {
+  CloudSun,
+  Github,
+  Mail,
+  Map,
+  UserRoundX,
+  type LucideIcon,
+} from 'lucide-react';
 
 export type AgentId =
   | 'weatherAgent'
   | 'emailAgent'
   | 'travelAgent'
-  | 'githubIssuesAgent';
+  | 'githubIssuesAgent'
+  | 'occupationSlackAgent';
 
 export interface AgentUiConfig {
   id: AgentId;
@@ -87,6 +95,24 @@ export const AGENT_CONFIGS: AgentUiConfig[] = [
       'Busca issues abiertos sobre autenticacion',
       'Crea un bug report para error al iniciar sesion',
       'Genera un issue de enhancement para modo oscuro',
+    ],
+  },
+  {
+    id: 'occupationSlackAgent',
+    route: 'agents/occupation-slack',
+    title: 'Agente ocupacion',
+    badge: 'Occupation + Slack Agent',
+    heading: 'Consulta usuarios y envia mensajes en Slack',
+    emptyTitle: 'Segmenta usuarios sin ocupacion y notificarlos',
+    emptyDescription:
+      'Este agente simula una base de datos de usuarios y permite enviar (o previsualizar) mensajes directos en Slack.',
+    placeholder:
+      'Ej: Busca usuarios con hasOccupation=false y envia aviso a los primeros 3',
+    icon: UserRoundX,
+    suggestions: [
+      'Muestra usuarios con hasOccupation=false',
+      'Haz dry run de notificacion a usuarios sin ocupacion',
+      'Envia mensaje solo a los primeros 2 usuarios sin ocupacion',
     ],
   },
 ];

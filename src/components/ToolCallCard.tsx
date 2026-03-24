@@ -13,6 +13,7 @@ import {
   Snowflake,
   CloudLightning,
   CloudCog,
+  UserRoundX,
 } from 'lucide-react';
 import type { ToolMessage } from '@langchain/langgraph-sdk';
 import type {
@@ -42,21 +43,17 @@ import type {
   weatherAgent as WeatherToolCallingAgent,
 } from '../agents/weatherAgent';
 
-/**
- * Helper type to filter out tool calls with generic `name: string`.
- * Keeps only tool calls where the name is a literal type (e.g., "get_weather").
- * This ensures discriminated union narrowing works correctly.
- */
-type WithLiteralName<T> = T extends { name: infer N }
-  ? string extends N
-    ? never // Exclude if name is generic `string`
-    : T
-  : never;
+type UnknownToolCall = {
+  name: string;
+  args: Record<string, unknown>;
+  id?: string;
+  type?: 'tool_call';
+};
 
 /**
  * Define the possible tool call types this component can handle.
  */
-export type AgentToolCalls = WithLiteralName<
+export type AgentToolCalls =
   /**
    * Infer tool call from the getWeather tool
    */
@@ -92,8 +89,7 @@ export type AgentToolCalls = WithLiteralName<
   /**
    * Infer tool call from GitHub issues agent instance
    */
-  | InferAgentToolCalls<typeof GithubIssuesToolCallingAgent>
->;
+  | InferAgentToolCalls<typeof GithubIssuesToolCallingAgent>;
 
 /**
  * Helper to parse tool result safely
@@ -103,12 +99,17 @@ export type AgentToolCalls = WithLiteralName<
 function parseToolResult(result?: ToolMessage): {
   status: string;
   content: string;
+  data?: unknown;
 } {
   if (!result) return { status: 'pending', content: '' };
   try {
     return JSON.parse(result.content as string);
   } catch {
-    return { status: 'success', content: result.content as string };
+    return {
+      status: 'success',
+      content: result.content as string,
+      data: undefined,
+    };
   }
 }
 
@@ -119,16 +120,28 @@ function parseToolResult(result?: ToolMessage): {
 export function ToolCallCard({
   toolCall,
 }: {
-  toolCall: ToolCallWithResult<AgentToolCalls>;
+  toolCall: ToolCallWithResult<AgentToolCalls | UnknownToolCall>;
 }) {
   const { call, result, state } = toolCall;
 
   if (call.name === 'send_email') {
-    return <EmailToolCallCard call={call} result={result} state={state} />;
+    return (
+      <EmailToolCallCard
+        call={call as ToolCallFromTool<typeof sendEmail>}
+        result={result}
+        state={state}
+      />
+    );
   }
 
   if (call.name === 'search_curriculum') {
-    return <CvSearchToolCallCard call={call} result={result} state={state} />;
+    return (
+      <CvSearchToolCallCard
+        call={call as ToolCallFromTool<typeof searchCurriculum>}
+        result={result}
+        state={state}
+      />
+    );
   }
 
   if (
@@ -136,7 +149,18 @@ export function ToolCallCard({
     call.name === 'ask_planner_specialist' ||
     call.name === 'email_trip_plan'
   ) {
-    return <TravelToolCallCard call={call} result={result} state={state} />;
+    return (
+      <TravelToolCallCard
+        call={
+          call as
+            | ToolCallFromTool<typeof askWeatherSpecialist>
+            | ToolCallFromTool<typeof askPlannerSpecialist>
+            | ToolCallFromTool<typeof emailTripPlan>
+        }
+        result={result}
+        state={state}
+      />
+    );
   }
 
   if (
@@ -144,11 +168,163 @@ export function ToolCallCard({
     call.name === 'create_github_issue'
   ) {
     return (
-      <GithubIssueToolCallCard call={call} result={result} state={state} />
+      <GithubIssueToolCallCard
+        call={
+          call as
+            | ToolCallFromTool<typeof searchGithubIssues>
+            | ToolCallFromTool<typeof createGithubIssue>
+        }
+        result={result}
+        state={state}
+      />
     );
   }
 
-  return <WeatherToolCallCard call={call} result={result} state={state} />;
+  if (
+    call.name === 'get_users_missing_occupation' ||
+    call.name === 'query_users_by_occupation' ||
+    call.name === 'notify_users_in_slack' ||
+    call.name === 'notify_users_missing_occupation'
+  ) {
+    return (
+      <OccupationSlackToolCallCard
+        call={call as UnknownToolCall}
+        result={result}
+        state={state}
+      />
+    );
+  }
+
+  if (call.name === 'get_weather') {
+    return (
+      <WeatherToolCallCard
+        call={call as ToolCallFromTool<typeof getWeather>}
+        result={result}
+        state={state}
+      />
+    );
+  }
+
+  return <GenericToolCallCard call={call} result={result} state={state} />;
+}
+
+function GenericToolCallCard({
+  call,
+  result,
+  state,
+}: {
+  call: UnknownToolCall;
+  result?: ToolMessage;
+  state: ToolCallState;
+}) {
+  const isLoading = state === 'pending';
+  const parsedResult = parseToolResult(result);
+  const isError = parsedResult.status === 'error';
+
+  return (
+    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm animate-fade-in">
+      <div className="mb-3 flex items-center gap-2 text-xs text-slate-500">
+        <Cloud className="h-4 w-4 text-slate-700" />
+        <span className="font-medium text-slate-700">Tool call</span>
+        {isLoading && <Loader2 className="ml-auto h-3.5 w-3.5 animate-spin" />}
+      </div>
+
+      <p className="text-sm text-slate-600 break-words">
+        <span className="font-medium text-slate-800">Tool:</span> {call.name}
+      </p>
+
+      {parsedResult.content && (
+        <div
+          className={`mt-3 rounded-lg border px-3 py-2 text-sm ${
+            isError
+              ? 'border-red-200 bg-red-50 text-red-700'
+              : 'border-emerald-200 bg-emerald-50 text-emerald-700'
+          }`}
+        >
+          <span>{parsedResult.content}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function OccupationSlackToolCallCard({
+  call,
+  result,
+  state,
+}: {
+  call: UnknownToolCall;
+  result?: ToolMessage;
+  state: ToolCallState;
+}) {
+  const isLoading = state === 'pending';
+  const parsedResult = parseToolResult(result);
+  const isError = parsedResult.status === 'error';
+  const label =
+    call.name === 'get_users_missing_occupation' ||
+    call.name === 'query_users_by_occupation'
+      ? 'Consulta de usuarios'
+      : call.name === 'notify_users_missing_occupation'
+        ? 'Recordatorio auto'
+        : 'Envio de Slack DM';
+
+  const recipients =
+    call.name === 'get_users_missing_occupation' &&
+    parsedResult.data &&
+    typeof parsedResult.data === 'object' &&
+    'recipients' in parsedResult.data &&
+    Array.isArray((parsedResult.data as { recipients: unknown[] }).recipients)
+      ? (
+          parsedResult.data as {
+            recipients: Array<{
+              id: string;
+              name: string;
+              slack_user_id: string | null;
+            }>;
+          }
+        ).recipients
+      : [];
+
+  return (
+    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm animate-fade-in">
+      <div className="mb-3 flex items-center gap-2 text-xs text-slate-500">
+        <UserRoundX className="h-4 w-4 text-slate-700" />
+        <span className="font-medium text-slate-700">{label}</span>
+        {isLoading && <Loader2 className="ml-auto h-3.5 w-3.5 animate-spin" />}
+      </div>
+
+      <p className="text-sm text-slate-600 break-words">
+        <span className="font-medium text-slate-800">Tool:</span> {call.name}
+      </p>
+
+      {parsedResult.content && (
+        <div
+          className={`mt-3 rounded-lg border px-3 py-2 text-sm ${
+            isError
+              ? 'border-red-200 bg-red-50 text-red-700'
+              : 'border-emerald-200 bg-emerald-50 text-emerald-700'
+          }`}
+        >
+          <span>{parsedResult.content}</span>
+        </div>
+      )}
+
+      {recipients.length > 0 && (
+        <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
+          <p className="font-medium text-slate-800">
+            Usuarios sin ocupacion ({recipients.length})
+          </p>
+          <p className="mt-1 break-words">
+            {recipients
+              .slice(0, 5)
+              .map((user) => `${user.name} (${user.id})`)
+              .join(', ')}
+            {recipients.length > 5 ? ' ...' : ''}
+          </p>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function TravelToolCallCard({
@@ -372,7 +548,6 @@ function parseWeatherContent(content: string): {
  */
 function getWeatherIcon(condition: string) {
   const c = condition.toLowerCase();
-  console.log('Condition for icon:', c);
   if (
     c.includes('lluvia') ||
     c.includes('llovizna') ||
