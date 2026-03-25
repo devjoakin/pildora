@@ -2,10 +2,10 @@ import { useLayoutEffect } from 'react';
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { AgentSidebar } from './components/AgentSidebar';
 import { EmailAgentPage } from './pages/EmailAgentPage';
-import { GithubIssuesAgentPage } from './pages/GithubIssuesAgentPage';
 import { OccupationSlackAgentPage } from './pages/OccupationSlackAgentPage';
 import { TravelAgentPage } from './pages/TravelAgentPage';
-import { WeatherAgentPage } from './pages/WeatherAgentPage';
+import { InfoAgentPage } from './pages/InfoAgentPage';
+import { SimpleAgentPage } from './pages/SimpleAgentPage';
 
 function ScrollToTopOnRouteChange() {
   const { pathname } = useLocation();
@@ -35,19 +35,16 @@ function App() {
       <ScrollToTopOnRouteChange />
       <Routes>
         <Route path="/" element={<AppLayout />}>
-          <Route index element={<Navigate to="/agents/weather" replace />} />
-          <Route path="agents/weather" element={<WeatherAgentPage />} />
+          <Route index element={<Navigate to="/agents/simple" replace />} />
+          <Route path="agents/simple" element={<SimpleAgentPage />} />
+          <Route path="agents/info" element={<InfoAgentPage />} />
           <Route path="agents/email" element={<EmailAgentPage />} />
           <Route path="agents/travel" element={<TravelAgentPage />} />
-          <Route
-            path="agents/github-issues"
-            element={<GithubIssuesAgentPage />}
-          />
           <Route
             path="agents/occupation-slack"
             element={<OccupationSlackAgentPage />}
           />
-          <Route path="*" element={<Navigate to="/agents/weather" replace />} />
+          <Route path="*" element={<Navigate to="/agents/simple" replace />} />
         </Route>
       </Routes>
     </>

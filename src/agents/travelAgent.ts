@@ -2,7 +2,7 @@ import { ChatOpenAI } from '@langchain/openai';
 import { createAgent, tool } from 'langchain';
 import { Resend } from 'resend';
 import { z } from 'zod/v4';
-import { getWeather } from './weatherAgent';
+import { getWeather } from './infoAgent';
 
 const model = new ChatOpenAI({ model: 'gpt-4o-mini' });
 

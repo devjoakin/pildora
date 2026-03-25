@@ -29,38 +29,55 @@ export function EmailAgentPage() {
             {
               title: 'Busqueda en CV (RAG basico)',
               language: 'ts',
-              code: `export const searchCurriculum = tool(
-  async ({ question }) => {
-    const retriever = await getCvRetriever();
-    const docs = await retriever.invoke(question);
-    if (docs.length === 0) {
-      return JSON.stringify({ status: 'not_found', content: 'No encontré información suficiente.' });
-    }
-    const context = docs.map((doc) => doc.pageContent).join('\n\n');
-    return JSON.stringify({ status: 'found', content: context });
-  },
-  {
-    name: 'search_curriculum',
-    schema: z.object({ question: z.string().min(3) }),
-  },
-);`,
+              code: `
+              export const searchCurriculum = tool(
+                async ({ question }) => {
+                  try {
+                    const retriever = await getCvRetriever();
+                    const docs = await retriever.invoke(question);
+                    ....
+                    const context = 
+                      docs.map((doc) => doc.pageContent).join('');
+                    return JSON.stringify({ 
+                      status: 'found', 
+                      content: context 
+                    });
+                  } catch (error) {
+                    return JSON.stringify({ 
+                      status: 'found', 
+                      content: context 
+                    });
+                  }
+                },
+                {
+                  name: 'search_curriculum',
+                  schema: z.object({ question: z.string().min(3) }),
+                },
+              );`,
             },
             {
               title: 'Fallback con Resend',
               language: 'ts',
-              code: `export const sendEmail = tool(
-  async ({ question }) => {
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    const { data, error } = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev',
-      to: [process.env.CV_FALLBACK_EMAIL as string],
-      subject: 'Nueva pregunta sin respuesta del agente CV',
-      html: \`<p>Pregunta sin respuesta:</p><blockquote>\${question}</blockquote>\`,
-    });
-    return JSON.stringify(error ? { status: 'error', content: error.message } : { status: 'success', data });
-  },
-  { name: 'send_email', schema: z.object({ question: z.string().min(3) }) },
-);`,
+              code: `
+              export const sendEmail = tool(
+                async ({ question }) => {
+                  const resend = new Resend(process.env.RESEND_API_KEY);
+                  const { data, error } = await resend.emails.send({
+                    from: process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev',
+                    to: [process.env.CV_FALLBACK_EMAIL as string],
+                    subject: 'Nueva pregunta sin respuesta del agente CV',
+                    html: \`<p>Pregunta sin respuesta:</p><blockquote>\${question}</blockquote>\`,
+                  });
+                  return JSON.stringify(
+                    error ? 
+                      { status: 'error', content: error.message } : 
+                      { status: 'success', data });
+                },
+                { 
+                  name: 'send_email', 
+                  schema: z.object({ question: z.string().min(3) }) 
+                },
+              );`,
             },
             {
               title: 'Creacion del cvAgent',
@@ -70,7 +87,11 @@ export function EmailAgentPage() {
                 model,
                tools: [searchCurriculum, sendEmail],
                 systemPrompt:
-                  'Eres un asistente que responde preguntas exclusivamente basadas en el CV del usuario. Primero llama a search_curriculum. Si devuelve status found, responde solo con esos fragmentos sin inventar datos. Si devuelve status not_found o no es suficiente para responder con confianza, llama a send_email con la pregunta y luego informa que se ha enviado un email de seguimiento.',
+                  'Eres un asistente que responde preguntas exclusivamente basadas en el CV 
+                  del usuario.  Primero llama a search_curriculum. Si devuelve status found, 
+                  responde solo con esos fragmentos sin inventar datos. Si devuelve status 
+                  not_found o no es suficiente para responder con confianza, llama a send_email 
+                  con la pregunta y luego informa que se ha enviado un email de seguimiento.',
               });`,
             },
           ]}

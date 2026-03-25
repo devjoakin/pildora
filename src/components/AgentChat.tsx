@@ -1,15 +1,14 @@
 import type { Message } from '@langchain/langgraph-sdk';
 import { useStream } from '@langchain/langgraph-sdk/react';
+import { AlertCircle } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { emailAgent } from '../agents/emailAgent';
-import type { githubIssuesAgent } from '../agents/githubIssuesAgent';
+import type { AgentId } from '../agents/agentConfig';
+import type { infoAgent } from '../agents/infoAgent';
 import type { occupationSlackAgent } from '../agents/occupationSlackAgent';
 import type { travelAgent } from '../agents/travelAgent';
-import type { weatherAgent } from '../agents/weatherAgent';
 import { useStickToBottom } from 'use-stick-to-bottom';
-import { AlertCircle } from 'lucide-react';
-import type { AgentId } from '../agents/agentConfig';
 import { EmptyState } from './EmptyState';
 import { LoadingIndicator } from './Loading';
 import { MessageBubble } from './MessageBubble';
@@ -50,10 +49,9 @@ export function AgentChat({
 }) {
   const { scrollRef, contentRef } = useStickToBottom({ initial: false });
   const stream = useStream<
-    | typeof weatherAgent
+    | typeof infoAgent
     | typeof emailAgent
     | typeof travelAgent
-    | typeof githubIssuesAgent
     | typeof occupationSlackAgent
   >({
     assistantId,

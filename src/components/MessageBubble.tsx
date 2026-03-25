@@ -27,6 +27,125 @@ function getTextContent(message: Message): string {
   return '';
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function markdownInlineToHtml(value: string): string {
+  return value
+    .replace(
+      /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noreferrer" class="text-sky-700 underline underline-offset-2 hover:text-sky-800">$1</a>',
+    )
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(
+      /`([^`]+)`/g,
+      '<code class="rounded bg-slate-900/10 px-1 py-0.5 font-mono text-[0.92em]">$1</code>',
+    );
+}
+
+function markdownToSafeHtml(markdown: string): string {
+  const escaped = escapeHtml(markdown.replace(/\r\n/g, '\n').trim());
+  const codeBlocks: string[] = [];
+
+  const withPlaceholders = escaped.replace(
+    /```([a-zA-Z0-9_-]+)?\n([\s\S]*?)```/g,
+    (_, language, code) => {
+      const langLabel =
+        typeof language === 'string' && language.trim().length > 0
+          ? `<span class="mb-2 inline-block rounded bg-slate-700 px-2 py-0.5 text-[11px] uppercase tracking-wide text-slate-200">${language.trim()}</span>`
+          : '';
+
+      const block = `<pre class="my-3 overflow-x-auto rounded-lg bg-slate-900 p-3 text-slate-100"><code class="font-mono text-[13px] leading-relaxed">${langLabel}${code.trim()}</code></pre>`;
+      const index = codeBlocks.push(block) - 1;
+      return `@@CODE_BLOCK_${index}@@`;
+    },
+  );
+
+  const lines = withPlaceholders.split('\n');
+  const parts: string[] = [];
+  let inList = false;
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    const placeholderMatch = line.match(/^@@CODE_BLOCK_(\d+)@@$/);
+
+    if (placeholderMatch) {
+      if (inList) {
+        parts.push('</ul>');
+        inList = false;
+      }
+
+      const index = Number(placeholderMatch[1]);
+      parts.push(codeBlocks[index]);
+      continue;
+    }
+
+    if (line.length === 0) {
+      if (inList) {
+        parts.push('</ul>');
+        inList = false;
+      }
+      continue;
+    }
+
+    if (/^[-*]\s+/.test(line)) {
+      if (!inList) {
+        parts.push('<ul class="my-2 list-disc space-y-1 pl-5">');
+        inList = true;
+      }
+
+      parts.push(
+        `<li>${markdownInlineToHtml(line.replace(/^[-*]\s+/, ''))}</li>`,
+      );
+      continue;
+    }
+
+    if (inList) {
+      parts.push('</ul>');
+      inList = false;
+    }
+
+    if (/^#{1,3}\s+/.test(line)) {
+      const level = line.match(/^#{1,3}/)?.[0].length ?? 1;
+      const text = markdownInlineToHtml(line.replace(/^#{1,3}\s+/, ''));
+      const tag = level === 1 ? 'h2' : level === 2 ? 'h3' : 'h4';
+      const className =
+        level === 1
+          ? 'mt-3 text-lg font-semibold'
+          : level === 2
+            ? 'mt-3 text-base font-semibold'
+            : 'mt-2 text-sm font-semibold';
+      parts.push(`<${tag} class="${className}">${text}</${tag}>`);
+      continue;
+    }
+
+    parts.push(`<p class="my-1">${markdownInlineToHtml(line)}</p>`);
+  }
+
+  if (inList) {
+    parts.push('</ul>');
+  }
+
+  return parts.join('');
+}
+
+function MarkdownContent({ content }: { content: string }) {
+  const html = markdownToSafeHtml(content);
+
+  return (
+    <div
+      className="leading-relaxed text-[15px]"
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+}
+
 /**
  * MessageBubble component that renders human and AI text messages.
  * Tool calls are handled separately by ToolCallCard.
@@ -75,9 +194,7 @@ function SystemBubble({ content }: { content: string }) {
     <div className="animate-fade-in">
       <div className="text-xs font-medium text-black-500 mb-2">System</div>
       <div className={BUBBLE_STYLES.system}>
-        <div className="whitespace-pre-wrap leading-relaxed text-[15px]">
-          {content}
-        </div>
+        <MarkdownContent content={content} />
       </div>
     </div>
   );
@@ -100,9 +217,7 @@ function AssistantBubble({ message }: { message: Message }) {
             Assistant
           </div>
           <div className={BUBBLE_STYLES.ai}>
-            <div className="whitespace-pre-wrap leading-relaxed text-[15px]">
-              {content}
-            </div>
+            <MarkdownContent content={content} />
           </div>
         </div>
       )}

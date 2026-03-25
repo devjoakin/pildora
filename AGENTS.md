@@ -16,7 +16,7 @@ Guidance for coding agents in `C:\Users\joaqu\Desktop\projects\pildora`.
 - App components: `src/components/*`
 - Shared UI primitives: `components/ui/*`
 - Shared helpers: `lib/*`
-- Agent graph: `src/agents/weatherAgent.ts`
+- Agent graph: `src/agents/infoAgent.ts`
 - LangGraph config: `langgraph.json`
 - Vite config: `vite.config.ts`
 - ESLint config: `eslint.config.js`

@@ -1,7 +1,6 @@
 import {
   Cloud,
   FileSearch,
-  Github,
   Mail,
   Loader2,
   MapPin,
@@ -34,14 +33,9 @@ import type {
   travelAgent as TravelToolCallingAgent,
 } from '../agents/travelAgent';
 import type {
-  createGithubIssue,
-  githubIssuesAgent as GithubIssuesToolCallingAgent,
-  searchGithubIssues,
-} from '../agents/githubIssuesAgent';
-import type {
   getWeather,
-  weatherAgent as WeatherToolCallingAgent,
-} from '../agents/weatherAgent';
+  infoAgent as InfoToolCallingAgent,
+} from '../agents/infoAgent';
 
 type UnknownToolCall = {
   name: string;
@@ -68,16 +62,14 @@ export type AgentToolCalls =
   | ToolCallFromTool<typeof askWeatherSpecialist>
   | ToolCallFromTool<typeof askPlannerSpecialist>
   | ToolCallFromTool<typeof emailTripPlan>
-  | ToolCallFromTool<typeof searchGithubIssues>
-  | ToolCallFromTool<typeof createGithubIssue>
   /**
    * Infer tool call from the searchCurriculum tool
    */
   | ToolCallFromTool<typeof searchCurriculum>
   /**
-   * Infer tool call from weather agent instance
+   * Infer tool call from info agent instance
    */
-  | InferAgentToolCalls<typeof WeatherToolCallingAgent>
+  | InferAgentToolCalls<typeof InfoToolCallingAgent>
   /**
    * Infer tool call from email agent instance
    */
@@ -85,11 +77,7 @@ export type AgentToolCalls =
   /**
    * Infer tool call from travel agent instance
    */
-  | InferAgentToolCalls<typeof TravelToolCallingAgent>
-  /**
-   * Infer tool call from GitHub issues agent instance
-   */
-  | InferAgentToolCalls<typeof GithubIssuesToolCallingAgent>;
+  | InferAgentToolCalls<typeof TravelToolCallingAgent>;
 
 /**
  * Helper to parse tool result safely
@@ -164,23 +152,6 @@ export function ToolCallCard({
   }
 
   if (
-    call.name === 'search_github_issues' ||
-    call.name === 'create_github_issue'
-  ) {
-    return (
-      <GithubIssueToolCallCard
-        call={
-          call as
-            | ToolCallFromTool<typeof searchGithubIssues>
-            | ToolCallFromTool<typeof createGithubIssue>
-        }
-        result={result}
-        state={state}
-      />
-    );
-  }
-
-  if (
     call.name === 'get_users_missing_occupation' ||
     call.name === 'query_users_by_occupation' ||
     call.name === 'notify_users_in_slack' ||
@@ -196,12 +167,14 @@ export function ToolCallCard({
   }
 
   if (call.name === 'get_weather') {
+    const weatherCall = call as ToolCallFromTool<typeof getWeather>;
+
+    if (shouldHideWeatherToolCallCard(weatherCall, result)) {
+      return null;
+    }
+
     return (
-      <WeatherToolCallCard
-        call={call as ToolCallFromTool<typeof getWeather>}
-        result={result}
-        state={state}
-      />
+      <WeatherToolCallCard call={weatherCall} result={result} state={state} />
     );
   }
 
@@ -378,53 +351,6 @@ function TravelToolCallCard({
   );
 }
 
-function GithubIssueToolCallCard({
-  call,
-  result,
-  state,
-}: {
-  call:
-    | ToolCallFromTool<typeof searchGithubIssues>
-    | ToolCallFromTool<typeof createGithubIssue>;
-  result?: ToolMessage;
-  state: ToolCallState;
-}) {
-  const isLoading = state === 'pending';
-  const parsedResult = parseToolResult(result);
-  const isError = parsedResult.status === 'error';
-
-  const label =
-    call.name === 'search_github_issues'
-      ? 'Busqueda de issues'
-      : 'Creacion de issue';
-
-  return (
-    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm animate-fade-in">
-      <div className="mb-3 flex items-center gap-2 text-xs text-slate-500">
-        <Github className="h-4 w-4 text-slate-700" />
-        <span className="font-medium text-slate-700">{label}</span>
-        {isLoading && <Loader2 className="ml-auto h-3.5 w-3.5 animate-spin" />}
-      </div>
-
-      <p className="text-sm text-slate-600 break-words">
-        <span className="font-medium text-slate-800">Tool:</span> {call.name}
-      </p>
-
-      {parsedResult.content && (
-        <div
-          className={`mt-3 rounded-lg border px-3 py-2 text-sm ${
-            isError
-              ? 'border-red-200 bg-red-50 text-red-700'
-              : 'border-emerald-200 bg-emerald-50 text-emerald-700'
-          }`}
-        >
-          <span>{parsedResult.content}</span>
-        </div>
-      )}
-    </div>
-  );
-}
-
 function CvSearchToolCallCard({
   call,
   result,
@@ -541,6 +467,41 @@ function parseWeatherContent(content: string): {
     wind: match[4],
     humidity: match[5],
   };
+}
+
+function isLikelyLocation(value: string): boolean {
+  const normalized = value.trim();
+
+  if (normalized.length < 2 || normalized.length > 40) {
+    return false;
+  }
+
+  const words = normalized.split(/\s+/).filter(Boolean);
+  if (words.length > 4) {
+    return false;
+  }
+
+  return /^[A-Za-z0-9À-ÿ .,'-]+$/.test(normalized);
+}
+
+function shouldHideWeatherToolCallCard(
+  call: ToolCallFromTool<typeof getWeather>,
+  result?: ToolMessage,
+): boolean {
+  const parsedResult = parseToolResult(result);
+  if (parsedResult.status === 'ignored') {
+    return true;
+  }
+
+  if (parsedResult.status !== 'error') {
+    return false;
+  }
+
+  const isUnknownLocationError = parsedResult.content
+    .toLowerCase()
+    .startsWith('could not find location:');
+
+  return isUnknownLocationError && !isLikelyLocation(call.args.location);
 }
 
 /**
