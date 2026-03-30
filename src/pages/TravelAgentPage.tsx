@@ -29,31 +29,47 @@ export function TravelAgentPage() {
             {
               title: 'Subagente de clima como tool',
               language: 'ts',
-              code: `const weatherSpecialist = createAgent({
-  model,
-  tools: [getWeather],
-  systemPrompt: 'You are a weather specialist...',
-});
+              code: `
+                const weatherSpecialist = createAgent({
+                  model,
+                  tools: [getWeather],
+                  systemPrompt: 'You are a weather specialist...',
+                });
 
-export const askWeatherSpecialist = tool(
-  async ({ destination }) => {
-    const result = await weatherSpecialist.invoke({
-      messages: [{ role: 'user', content: \`Consulta el clima de \${destination}\` }],
-    });
-    return JSON.stringify({ status: 'success', content: extractTextFromAgentResult(result) });
-  },
-  { name: 'ask_weather_specialist', schema: z.object({ destination: z.string() }) },
-);`,
+                export const askWeatherSpecialist = tool(
+                  async ({ destination }) => {
+                    const result = await weatherSpecialist.invoke({
+                    messages: [{ 
+                      role: 'user', 
+                       content: \`Consulta el clima de \${destination}\` 
+                      }],
+                    });
+                    return JSON.stringify({ 
+                      status: 'success', 
+                      content: extractTextFromAgentResult(result) 
+                    });
+                  },
+                  { 
+                    name: 'ask_weather_specialist', 
+                    schema: z.object({ destination: z.string() }) 
+                  },
+                );`,
             },
             {
               title: 'Supervisor que orquesta subagentes',
               language: 'ts',
-              code: `export const travelAgent = createAgent({
-  model,
-  tools: [askWeatherSpecialist, askPlannerSpecialist, emailTripPlan],
-  systemPrompt:
-    'First call weather + planner subagents. If user asks, send itinerary via email.',
-});`,
+              code: `
+              export const travelAgent = createAgent({
+                model,
+                tools: [
+                  askWeatherSpecialist, 
+                  askPlannerSpecialist, 
+                  emailTripPlan
+                ],
+                systemPrompt:
+                  'First call weather + planner subagents. 
+                  If user asks, send itinerary via email.',
+              });`,
             },
           ]}
         />
