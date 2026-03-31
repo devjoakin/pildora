@@ -31,32 +31,6 @@ export function EmptyState({
         {description}
       </p>
 
-      {/* <div className="mb-7 grid gap-3 text-left sm:grid-cols-3">
-        <article className="rounded-2xl border border-orange-100 bg-white/80 p-3 shadow-sm backdrop-blur">
-          <Sparkles className="mb-2 h-4 w-4 text-orange-500" />
-          <p className="text-xs font-medium text-slate-800">
-            Respuestas claras
-          </p>
-          <p className="mt-1 text-xs text-slate-500">
-            Obtén clima y contexto en segundos.
-          </p>
-        </article>
-        <article className="rounded-2xl border border-sky-100 bg-white/80 p-3 shadow-sm backdrop-blur">
-          <Compass className="mb-2 h-4 w-4 text-sky-500" />
-          <p className="text-xs font-medium text-slate-800">Cualquier ciudad</p>
-          <p className="mt-1 text-xs text-slate-500">
-            Consulta ubicaciones locales o globales.
-          </p>
-        </article>
-        <article className="rounded-2xl border border-emerald-100 bg-white/80 p-3 shadow-sm backdrop-blur">
-          <Timer className="mb-2 h-4 w-4 text-emerald-500" />
-          <p className="text-xs font-medium text-slate-800">Flujo continuo</p>
-          <p className="mt-1 text-xs text-slate-500">
-            Resultados y tool-calls en tiempo real.
-          </p>
-        </article>
-      </div> */}
-
       {suggestions.length > 0 && (
         <div className="flex flex-wrap justify-center gap-2">
           {suggestions.map((suggestion) => (

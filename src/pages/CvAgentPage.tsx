@@ -1,4 +1,4 @@
-import { Mail } from 'lucide-react';
+import { FileUser } from 'lucide-react';
 import { AgentChat, type AgentChatUi } from '../components/AgentChat';
 import { CodeSnippetSection } from '../components/CodeSnippetSection';
 
@@ -9,7 +9,7 @@ const EMAIL_PAGE_UI: AgentChatUi = {
   emptyDescription:
     'Este agente lee el PDF de tu curriculum y responde con esa base. Si no encuentra la respuesta, enviará un email de seguimiento.',
   placeholder: 'Ej: ¿Cuántos años de experiencia tengo en frontend?',
-  icon: Mail,
+  icon: FileUser,
   suggestions: [
     '¿Qué stack uso actualmente?',
     '¿En qué proyectos he trabajado recientemente?',
@@ -17,10 +17,10 @@ const EMAIL_PAGE_UI: AgentChatUi = {
   ],
 };
 
-export function EmailAgentPage() {
+export function CvAgentPage() {
   return (
     <AgentChat
-      assistantId="emailAgent"
+      assistantId="cvAgent"
       ui={EMAIL_PAGE_UI}
       snippetSection={
         <CodeSnippetSection

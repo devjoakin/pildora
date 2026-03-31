@@ -1,16 +1,16 @@
-import { Info } from 'lucide-react';
+import { CloudSun } from 'lucide-react';
 import { AgentChat, type AgentChatUi } from '../components/AgentChat';
 import { CodeSnippetSection } from '../components/CodeSnippetSection';
 
-const INFO_PAGE_UI: AgentChatUi = {
-  badge: 'Info Agent',
+const WEATHER_PAGE_UI: AgentChatUi = {
+  badge: 'Weather Agent',
   heading: 'Consulta clima o noticias en tiempo real',
   emptyTitle:
-    'Pregunta por el clima de cualquier ciudad o busca noticias actuales',
+    'Pregunta por el clima de cualquier ciudad',
   emptyDescription:
     'Este agente combina herramientas en tiempo real para responder de forma precisa.',
   placeholder: 'Ej: ¿Qué tiempo hace en Valencia? ¿Cómo están las noticias?',
-  icon: Info,
+  icon: CloudSun,
   suggestions: [
     '¿Qué es React.js?',
     '¿Qué tiempo hace en Alicante?',
@@ -18,14 +18,14 @@ const INFO_PAGE_UI: AgentChatUi = {
   ],
 };
 
-export function InfoAgentPage() {
+export function WeatherAgentPage() {
   return (
     <AgentChat
-      assistantId="infoAgent"
-      ui={INFO_PAGE_UI}
+      assistantId="weatherAgent"
+      ui={WEATHER_PAGE_UI}
       snippetSection={
         <CodeSnippetSection
-          title="Como se implementa el agente info"
+          title="Como se implementa el agente weather"
           items={[
             {
               title: 'Tool get_weather',
@@ -60,12 +60,12 @@ export function InfoAgentPage() {
               );`,
             },
             {
-              title: 'Creacion del infoAgent',
+              title: 'Creacion del weatherAgent',
               language: 'ts',
               code: `
-              export const infoAgent = createAgent({
+              export const weatherAgent = createAgent({
                 model,
-                tools: [getWeather, tools.webSearch()],
+                tools: [getWeather],
                 systemPrompt:
                   'Eres un asistente que puede proporcionar información meteorológica actual 
                   para cualquier ubicación utilizando la herramienta get_weather, y también 

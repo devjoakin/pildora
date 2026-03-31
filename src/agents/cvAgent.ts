@@ -189,7 +189,7 @@ export const sendEmail = tool(
   },
 );
 
-export const emailAgent = createAgent({
+export const cvAgent = createAgent({
   model,
   tools: [searchCurriculum, sendEmail],
   systemPrompt:

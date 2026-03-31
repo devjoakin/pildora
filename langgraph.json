@@ -1,11 +1,12 @@
 {
   "node_version": "22",
   "graphs": {
+    "occupationSlackAgent": "./src\\agents\\occupationSlackAgent.ts:occupationSlackAgent",
     "simpleAgent": "./src\\agents\\simpleAgent.ts:simpleAgent",
-    "infoAgent": "./src\\agents\\infoAgent.ts:infoAgent",
-    "emailAgent": "./src\\agents\\emailAgent.ts:emailAgent",
     "travelAgent": "./src\\agents\\travelAgent.ts:travelAgent",
-    "occupationSlackAgent": "./src\\agents\\occupationSlackAgent.ts:occupationSlackAgent"
+    "weatherAgent": "./src\\agents\\weatherAgent.ts:weatherAgent",
+    "webAgent": "./src\\agents\\webAgent.ts:webAgent",
+    "cvAgent": "./src\\agents\\cvAgent.ts:cvAgent"
   },
   "env": ".env"
 }

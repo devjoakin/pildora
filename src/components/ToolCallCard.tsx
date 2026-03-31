@@ -22,10 +22,10 @@ import type {
   InferAgentToolCalls,
 } from '@langchain/langgraph-sdk/react';
 import type {
-  emailAgent as EmailToolCallingAgent,
+  cvAgent as CvToolCallingAgent,
   searchCurriculum,
   sendEmail,
-} from '../agents/emailAgent';
+} from '../agents/cvAgent';
 import type {
   askPlannerSpecialist,
   askWeatherSpecialist,
@@ -34,8 +34,8 @@ import type {
 } from '../agents/travelAgent';
 import type {
   getWeather,
-  infoAgent as InfoToolCallingAgent,
-} from '../agents/infoAgent';
+  weatherAgent as WebToolCallingAgent,
+} from '../agents/weatherAgent';
 
 type UnknownToolCall = {
   name: string;
@@ -69,11 +69,11 @@ export type AgentToolCalls =
   /**
    * Infer tool call from info agent instance
    */
-  | InferAgentToolCalls<typeof InfoToolCallingAgent>
+  | InferAgentToolCalls<typeof WebToolCallingAgent>
   /**
    * Infer tool call from email agent instance
    */
-  | InferAgentToolCalls<typeof EmailToolCallingAgent>
+  | InferAgentToolCalls<typeof CvToolCallingAgent>
   /**
    * Infer tool call from travel agent instance
    */

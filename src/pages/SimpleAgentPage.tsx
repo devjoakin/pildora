@@ -39,7 +39,7 @@ export function SimpleAgentPage() {
                 model,
                 systemPrompt:
                   'Eres un asistente que puede proporcionar información acerca
-                  de cualqeuir cosa o tema de actualidad.',
+                  de cualquier cosa o tema de actualidad.',
               });`,
             },
           ]}

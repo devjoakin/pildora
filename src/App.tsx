@@ -1,11 +1,12 @@
 import { useLayoutEffect } from 'react';
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { AgentSidebar } from './components/AgentSidebar';
-import { EmailAgentPage } from './pages/EmailAgentPage';
+import { CvAgentPage } from './pages/CvAgentPage';
 import { OccupationSlackAgentPage } from './pages/OccupationSlackAgentPage';
 import { TravelAgentPage } from './pages/TravelAgentPage';
-import { InfoAgentPage } from './pages/InfoAgentPage';
+import { WeatherAgentPage } from './pages/weatherAgentPage';
 import { SimpleAgentPage } from './pages/SimpleAgentPage';
+import { WebAgentPage } from './pages/WebAgentPage';
 
 function ScrollToTopOnRouteChange() {
   const { pathname } = useLocation();
@@ -37,8 +38,9 @@ function App() {
         <Route path="/" element={<AppLayout />}>
           <Route index element={<Navigate to="/agents/simple" replace />} />
           <Route path="agents/simple" element={<SimpleAgentPage />} />
-          <Route path="agents/info" element={<InfoAgentPage />} />
-          <Route path="agents/email" element={<EmailAgentPage />} />
+          <Route path="agents/weather" element={<WeatherAgentPage />} />
+          <Route path="agents/web" element={<WebAgentPage />} />
+          <Route path="agents/cv" element={<CvAgentPage />} />
           <Route path="agents/travel" element={<TravelAgentPage />} />
           <Route
             path="agents/occupation-slack"

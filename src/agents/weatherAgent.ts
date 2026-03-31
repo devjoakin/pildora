@@ -1,5 +1,5 @@
 import { createAgent, tool } from 'langchain';
-import { ChatOpenAI, tools } from '@langchain/openai';
+import { ChatOpenAI } from '@langchain/openai';
 import { z } from 'zod/v4';
 
 const model = new ChatOpenAI({
@@ -103,9 +103,9 @@ export const getWeather = tool(
   },
 );
 
-export const infoAgent = createAgent({
+export const weatherAgent = createAgent({
   model,
-  tools: [getWeather, tools.webSearch()],
+  tools: [getWeather],
   systemPrompt:
     'Eres un asistente general en espanol. REGLA ESTRICTA: solo puedes llamar get_weather cuando la pregunta sea explicitamente sobre clima/temperatura/pronostico y el usuario de una ubicacion concreta (ciudad, region o pais). Si la pregunta no trata de clima, esta incompleta, o no hay ubicacion clara, NO llames get_weather. En esos casos responde de forma normal o usa webSearch si se requiere informacion actualizada. No fuerces llamadas a herramientas.',
 });

@@ -1,17 +1,19 @@
 import {
-  Info,
-  Mail,
   Map,
   UserRoundX,
   User,
+  Globe,
   type LucideIcon,
+  CloudSun,
+  FileUser,
 } from 'lucide-react';
 
 export type AgentId =
   | 'simpleAgent'
-  | 'infoAgent'
-  | 'emailAgent'
+  | 'weatherAgent'
+  | 'cvAgent'
   | 'travelAgent'
+  | 'webAgent'
   | 'occupationSlackAgent';
 
 export interface AgentUiConfig {
@@ -31,18 +33,25 @@ export const AGENT_CONFIGS: AgentUiConfig[] = [
     icon: User,
   },
   {
-    id: 'infoAgent',
-    route: 'agents/info',
-    title: 'Agente Info',
-    heading: 'Consulta clima y noticias en tiempo real',
-    icon: Info,
+    id: 'webAgent',
+    route: 'agents/web',
+    title: 'Agente Web',
+    heading: 'Consulta información en línea',
+    icon: Globe,
   },
   {
-    id: 'emailAgent',
-    route: 'agents/email',
+    id: 'weatherAgent',
+    route: 'agents/weather',
+    title: 'Agente Weather',
+    heading: 'Consulta clima en tiempo real',
+    icon: CloudSun,
+  },
+  {
+    id: 'cvAgent',
+    route: 'agents/cv',
     title: 'Agente CV',
     heading: 'Responde sobre mi curriculum',
-    icon: Mail,
+    icon: FileUser,
   },
   {
     id: 'travelAgent',
