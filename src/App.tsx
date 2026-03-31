@@ -4,9 +4,9 @@ import { AgentSidebar } from './components/AgentSidebar';
 import { CvAgentPage } from './pages/CvAgentPage';
 import { OccupationSlackAgentPage } from './pages/OccupationSlackAgentPage';
 import { TravelAgentPage } from './pages/TravelAgentPage';
-import { WeatherAgentPage } from './pages/weatherAgentPage';
 import { SimpleAgentPage } from './pages/SimpleAgentPage';
 import { WebAgentPage } from './pages/WebAgentPage';
+import { WeatherAgentPage } from './pages/weatherAgentPage';
 
 function ScrollToTopOnRouteChange() {
   const { pathname } = useLocation();

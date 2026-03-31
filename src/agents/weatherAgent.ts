@@ -6,34 +6,13 @@ const model = new ChatOpenAI({
   model: 'gpt-4o-mini',
 });
 
-function isLikelyLocation(value: string): boolean {
-  const normalized = value.trim();
-
-  if (normalized.length < 2 || normalized.length > 40) {
-    return false;
-  }
-
-  const words = normalized.split(/\s+/).filter(Boolean);
-  if (words.length > 4) {
-    return false;
-  }
-
-  return /^[A-Za-z0-9À-ÿ .,'-]+$/.test(normalized);
-}
 
 /**
  * Custom weather tool
  */
 export const getWeather = tool(
   async ({ location }) => {
-    if (!isLikelyLocation(location)) {
-      return JSON.stringify({
-        status: 'ignored',
-        content:
-          'Skipped get_weather: the provided value is not a specific location.',
-      });
-    }
-
+  
     // Use Open-Meteo geocoding API to get coordinates
     const geoResponse = await fetch(
       `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
@@ -107,5 +86,5 @@ export const weatherAgent = createAgent({
   model,
   tools: [getWeather],
   systemPrompt:
-    'Eres un asistente general en espanol. REGLA ESTRICTA: solo puedes llamar get_weather cuando la pregunta sea explicitamente sobre clima/temperatura/pronostico y el usuario de una ubicacion concreta (ciudad, region o pais). Si la pregunta no trata de clima, esta incompleta, o no hay ubicacion clara, NO llames get_weather. En esos casos responde de forma normal o usa webSearch si se requiere informacion actualizada. No fuerces llamadas a herramientas.',
+    'Eres un asistente general en espanol. REGLA ESTRICTA: solo puedes llamar get_weather cuando la pregunta sea explicitamente sobre clima/temperatura/pronostico y el usuario de una ubicacion concreta (ciudad, region o pais). Si la pregunta no trata de clima, esta incompleta, o no hay ubicacion clara, NO llames get_weather. En esos casos responde de forma normal. No fuerces llamadas a herramientas.',
 });

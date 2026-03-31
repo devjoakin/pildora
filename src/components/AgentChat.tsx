@@ -3,11 +3,12 @@ import { useStream } from '@langchain/langgraph-sdk/react';
 import { AlertCircle } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
-import type { emailAgent } from '../agents/cvAgent';
+import type { cvAgent } from '../agents/cvAgent';
 import type { AgentId } from '../agents/agentConfig';
-import type { infoAgent } from '../agents/weatherAgent';
+import type { weatherAgent } from '../agents/weatherAgent';
 import type { occupationSlackAgent } from '../agents/occupationSlackAgent';
 import type { travelAgent } from '../agents/travelAgent';
+import type { webAgent } from '../agents/webAgent';
 import { useStickToBottom } from 'use-stick-to-bottom';
 import { EmptyState } from './EmptyState';
 import { LoadingIndicator } from './Loading';
@@ -49,15 +50,28 @@ export function AgentChat({
 }) {
   const { scrollRef, contentRef } = useStickToBottom({ initial: false });
   const stream = useStream<
-    | typeof infoAgent
-    | typeof emailAgent
+    | typeof weatherAgent
+    | typeof cvAgent
     | typeof travelAgent
     | typeof occupationSlackAgent
+    | typeof webAgent
   >({
     assistantId,
     apiUrl: 'http://localhost:2024',
   });
   const hasMessages = stream.messages.length > 0;
+  const messageToolCallIds = new Set(
+    stream.messages
+      .flatMap((message) =>
+        message.type === 'ai' ? stream.getToolCalls(message) : [],
+      )
+      .map((toolCall) => toolCall.call.id)
+      .filter((id): id is string => typeof id === 'string'),
+  );
+  const inFlightToolCalls = stream.toolCalls.filter(
+    (toolCall) =>
+      toolCall.call.id == null || !messageToolCallIds.has(toolCall.call.id),
+  );
 
   const handleSubmit = (content: string) => {
     stream.submit({ messages: [{ content, type: 'human' }] });
@@ -97,6 +111,17 @@ export function AgentChat({
           {(hasMessages || stream.isLoading) && (
             <div className="animate-rise-in rounded-3xl border border-white/80 bg-white/85 p-4 shadow-[0_30px_80px_-55px_rgba(15,23,42,0.5)] backdrop-blur sm:p-6">
               <div className="flex flex-col gap-6">
+                {inFlightToolCalls.length > 0 && (
+                  <div className="flex flex-col gap-3">
+                    {inFlightToolCalls.map((toolCall, index) => (
+                      <ToolCallCard
+                        key={toolCall.id ?? toolCall.call.id ?? `tool-${index}`}
+                        toolCall={toolCall}
+                      />
+                    ))}
+                  </div>
+                )}
+
                 {stream.messages.map((message, index) => {
                   if (message.type === 'ai') {
                     const toolCalls = stream.getToolCalls(message);

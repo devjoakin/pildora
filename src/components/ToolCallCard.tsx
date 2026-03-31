@@ -1,10 +1,7 @@
 import {
   Cloud,
-  FileSearch,
-  Mail,
   Loader2,
   MapPin,
-  Send,
   Wind,
   Droplets,
   Sun,
@@ -34,8 +31,9 @@ import type {
 } from '../agents/travelAgent';
 import type {
   getWeather,
-  weatherAgent as WebToolCallingAgent,
+  weatherAgent as WeatherToolCallingAgent,
 } from '../agents/weatherAgent';
+import type { webAgent as WebToolCallingAgent } from '../agents/webAgent';
 
 type UnknownToolCall = {
   name: string;
@@ -67,7 +65,11 @@ export type AgentToolCalls =
    */
   | ToolCallFromTool<typeof searchCurriculum>
   /**
-   * Infer tool call from info agent instance
+   * Infer tool call from weather agent instance
+   */
+  | InferAgentToolCalls<typeof WeatherToolCallingAgent>
+  /**
+   * Infer tool call from web agent instance
    */
   | InferAgentToolCalls<typeof WebToolCallingAgent>
   /**
@@ -116,7 +118,6 @@ export function ToolCallCard({
     return (
       <EmailToolCallCard
         call={call as ToolCallFromTool<typeof sendEmail>}
-        result={result}
         state={state}
       />
     );
@@ -126,7 +127,6 @@ export function ToolCallCard({
     return (
       <CvSearchToolCallCard
         call={call as ToolCallFromTool<typeof searchCurriculum>}
-        result={result}
         state={state}
       />
     );
@@ -149,6 +149,10 @@ export function ToolCallCard({
         state={state}
       />
     );
+  }
+
+  if (isWebSearchToolCall(call)) {
+    return <WebSearchToolCallCard call={call} result={result} state={state} />;
   }
 
   if (
@@ -183,7 +187,6 @@ export function ToolCallCard({
 
 function GenericToolCallCard({
   call,
-  result,
   state,
 }: {
   call: UnknownToolCall;
@@ -191,32 +194,16 @@ function GenericToolCallCard({
   state: ToolCallState;
 }) {
   const isLoading = state === 'pending';
-  const parsedResult = parseToolResult(result);
-  const isError = parsedResult.status === 'error';
 
   return (
-    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm animate-fade-in">
-      <div className="mb-3 flex items-center gap-2 text-xs text-slate-500">
-        <Cloud className="h-4 w-4 text-slate-700" />
-        <span className="font-medium text-slate-700">Tool call</span>
-        {isLoading && <Loader2 className="ml-auto h-3.5 w-3.5 animate-spin" />}
+    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-sm animate-fade-in">
+      <div className="flex items-center gap-2 text-xs text-slate-500">
+        {isLoading && <Loader2 className="ml-auto h-1.5 w-3.5 animate-spin" />}
       </div>
 
       <p className="text-sm text-slate-600 break-words">
         <span className="font-medium text-slate-800">Tool:</span> {call.name}
       </p>
-
-      {parsedResult.content && (
-        <div
-          className={`mt-3 rounded-lg border px-3 py-2 text-sm ${
-            isError
-              ? 'border-red-200 bg-red-50 text-red-700'
-              : 'border-emerald-200 bg-emerald-50 text-emerald-700'
-          }`}
-        >
-          <span>{parsedResult.content}</span>
-        </div>
-      )}
     </div>
   );
 }
@@ -300,6 +287,58 @@ function OccupationSlackToolCallCard({
   );
 }
 
+function isWebSearchToolCall(call: UnknownToolCall): boolean {
+  return /web[_-]?search/i.test(call.name);
+}
+
+function getWebSearchQuery(args: Record<string, unknown>): string {
+  const possibleQuery =
+    typeof args.query === 'string'
+      ? args.query
+      : typeof args.search_query === 'string'
+        ? args.search_query
+        : typeof args.q === 'string'
+          ? args.q
+          : null;
+
+  return possibleQuery?.trim() ?? '';
+}
+
+function WebSearchToolCallCard({
+  call,
+  result: _result,
+  state,
+}: {
+  call: UnknownToolCall;
+  result?: ToolMessage;
+  state: ToolCallState;
+}) {
+  const isLoading = state === 'pending';
+  // const parsedResult = parseToolResult(result);
+  //const isError = parsedResult.status === 'error';
+  const query = getWebSearchQuery(call.args);
+
+  return (
+    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-sm animate-fade-in">
+      <div className="flex items-center gap-2 text-xs text-slate-500">
+        {/* <Globe className="h-4 w-4 text-slate-700" />
+        <span className="font-medium text-slate-700">Busqueda web</span> */}
+        {isLoading && <Loader2 className="ml-auto h-1.5 w-3.5 animate-spin" />}
+      </div>
+
+      <p className="text-sm text-slate-600 break-words">
+        <span className="font-medium text-slate-800">Tool:</span> {call.name}
+      </p>
+
+      {query && (
+        <p className="mt-1 text-sm text-slate-600 break-words">
+          <span className="font-medium text-slate-800">Consulta:</span> {query}
+        </p>
+      )}
+    </div>
+  );
+}
+
 function TravelToolCallCard({
   call,
   result,
@@ -353,7 +392,6 @@ function TravelToolCallCard({
 
 function CvSearchToolCallCard({
   call,
-  result,
   state,
 }: {
   call: ToolCallFromTool<typeof searchCurriculum>;
@@ -361,24 +399,27 @@ function CvSearchToolCallCard({
   state: ToolCallState;
 }) {
   const isLoading = state === 'pending';
-  const parsedResult = parseToolResult(result);
-  const isError = parsedResult.status === 'error';
-  const isNotFound = parsedResult.status === 'not_found';
+  // const parsedResult = parseToolResult(result);
+  // const isError = parsedResult.status === 'error';
+  // const isNotFound = parsedResult.status === 'not_found';
 
   return (
-    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm animate-fade-in">
-      <div className="mb-3 flex items-center gap-2 text-xs text-slate-500">
-        <FileSearch className="h-4 w-4 text-slate-700" />
-        <span className="font-medium text-slate-700">Busqueda en CV</span>
-        {isLoading && <Loader2 className="ml-auto h-3.5 w-3.5 animate-spin" />}
+    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-sm animate-fade-in">
+      <div className="flex items-center gap-2 text-xs text-slate-500">
+        {/* <FileSearch className="h-4 w-4 text-slate-700" />
+        <span className="font-medium text-slate-700">Busqueda en CV</span> */}
+        {isLoading && <Loader2 className="ml-auto h-1.5 w-3.5 animate-spin" />}
       </div>
 
+      <p className="text-sm text-slate-600 break-words">
+        <span className="font-medium text-slate-800">Tool:</span> {call.name}
+      </p>
       <p className="text-sm text-slate-600">
         <span className="font-medium text-slate-800">Pregunta:</span>{' '}
         {call.args.question}
       </p>
 
-      {parsedResult.content && (
+      {/* {parsedResult.content && (
         <div
           className={`mt-3 rounded-lg border px-3 py-2 text-sm ${
             isError
@@ -390,14 +431,14 @@ function CvSearchToolCallCard({
         >
           <span>{parsedResult.content}</span>
         </div>
-      )}
+      )} */}
     </div>
   );
 }
 
 function EmailToolCallCard({
   call,
-  result,
+  result: _result,
   state,
 }: {
   call: ToolCallFromTool<typeof sendEmail>;
@@ -405,42 +446,22 @@ function EmailToolCallCard({
   state: ToolCallState;
 }) {
   const isLoading = state === 'pending';
-  const parsedResult = parseToolResult(result);
-  const isError = parsedResult.status === 'error';
 
   return (
-    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm animate-fade-in">
-      <div className="mb-3 flex items-center gap-2 text-xs text-slate-500">
-        <Mail className="h-4 w-4 text-slate-700" />
-        <span className="font-medium text-slate-700">Envio de email</span>
-        {isLoading && <Loader2 className="ml-auto h-3.5 w-3.5 animate-spin" />}
+    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-sm animate-fade-in">
+      <div className="flex items-center gap-2 text-xs text-slate-500">
+        {isLoading && <Loader2 className="ml-auto h-1.5 w-3.5 animate-spin" />}
       </div>
 
       <div className="grid gap-1 text-sm">
-        <p className="text-slate-600">
-          <span className="font-medium text-slate-800">Motivo:</span> Pregunta
-          sin respuesta en el CV
+        <p className="text-sm text-slate-600 break-words">
+          <span className="font-medium text-slate-800">Tool:</span> {call.name}
         </p>
         <p className="text-slate-600">
           <span className="font-medium text-slate-800">Pregunta:</span>{' '}
           {call.args.question}
         </p>
       </div>
-
-      {parsedResult.content && (
-        <div
-          className={`mt-3 rounded-lg border px-3 py-2 text-sm ${
-            isError
-              ? 'border-red-200 bg-red-50 text-red-700'
-              : 'border-emerald-200 bg-emerald-50 text-emerald-700'
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            {!isError && <Send className="h-4 w-4" />}
-            <span>{parsedResult.content}</span>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -549,60 +570,83 @@ function WeatherToolCallCard({
   const weather = !isError ? parseWeatherContent(parsedResult.content) : null;
 
   return (
-    <div className="relative overflow-hidden rounded-xl animate-fade-in">
-      {/* Sky gradient background */}
-      <div className="absolute inset-0 bg-linear-to-br from-sky-600 via-sky-500 to-indigo-600" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.15),transparent_50%)]" />
-
-      <div className="relative p-4">
-        {/* Location header */}
-        <div className="flex items-center gap-2 text-white/80 text-xs mb-3">
-          <MapPin className="w-3 h-3" />
-          <span className="font-medium">{call.args.location}</span>
-          {isLoading && <Loader2 className="w-3 h-3 animate-spin ml-auto" />}
+    <>
+      {' '}
+      <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-sm animate-fade-in">
+        <div className="flex items-center gap-2 text-xs text-slate-500">
+          {/* <Globe className="h-4 w-4 text-slate-700" />
+        <span className="font-medium text-slate-700">Busqueda web</span> */}
+          {isLoading && (
+            <Loader2 className="ml-auto h-1.5 w-3.5 animate-spin" />
+          )}
         </div>
 
-        {isError ? (
-          <div className="bg-red-500/20 backdrop-blur-sm rounded-lg p-3 text-red-200 text-sm border border-red-400/30">
-            {parsedResult.content}
-          </div>
-        ) : weather ? (
-          <div className="flex items-start justify-between">
-            {/* Left: Icon and condition */}
-            <div className="flex flex-col items-start">
-              {getWeatherIcon(weather.condition)}
-              <span className="text-white/90 text-xs mt-1 font-medium">
-                {weather.condition}
-              </span>
-            </div>
+        <p className="text-sm text-slate-600 break-words">
+          <span className="font-medium text-slate-800">Tool:</span> {call.name}
+        </p>
 
-            {/* Right: Temperature */}
-            <div className="text-right">
-              <div className="text-4xl font-light text-white tracking-tight">
-                {weather.temperature}
-              </div>
-              {/* Stats row */}
-              <div className="flex gap-3 mt-2 text-white/70 text-xs">
-                <div className="flex items-center gap-1">
-                  <Wind className="w-3 h-3" />
-                  <span>{weather.wind}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Droplets className="w-3 h-3" />
-                  <span>{weather.humidity}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center justify-center py-4">
-            <div className="flex flex-col items-center gap-2 text-white/60">
-              <Cloud className="w-8 h-8 animate-pulse" />
-              <span className="text-xs">Fetching weather...</span>
-            </div>
-          </div>
-        )}
+        {call.args.location && (
+          <p className="mt-1 text-sm text-slate-600 break-words">
+            <span className="font-medium text-slate-800">Ubicación:</span>{' '}
+            {call.args.location}
+          </p>
+        )} 
       </div>
-    </div>
+      <div className="relative overflow-hidden rounded-xl animate-fade-in">
+        {/* Sky gradient background */}
+        <div className="absolute inset-0 bg-linear-to-br from-sky-600 via-sky-500 to-indigo-600" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.15),transparent_50%)]" />
+
+        <div className="relative p-4">
+          {/* Location header */}
+          <div className="flex items-center gap-2 text-white/80 text-xs mb-3">
+            <MapPin className="w-3 h-3" />
+            <span className="font-medium">{call.args.location}</span>
+            {isLoading && <Loader2 className="w-3 h-3 animate-spin ml-auto" />}
+          </div>
+
+          {isError ? (
+            <div className="bg-red-500/20 backdrop-blur-sm rounded-lg p-3 text-red-200 text-sm border border-red-400/30">
+              {parsedResult.content}
+            </div>
+          ) : weather ? (
+            <div className="flex items-start justify-between">
+              {/* Left: Icon and condition */}
+              <div className="flex flex-col items-start">
+                {getWeatherIcon(weather.condition)}
+                <span className="text-white/90 text-xs mt-1 font-medium">
+                  {weather.condition}
+                </span>
+              </div>
+
+              {/* Right: Temperature */}
+              <div className="text-right">
+                <div className="text-4xl font-light text-white tracking-tight">
+                  {weather.temperature}
+                </div>
+                {/* Stats row */}
+                <div className="flex gap-3 mt-2 text-white/70 text-xs">
+                  <div className="flex items-center gap-1">
+                    <Wind className="w-3 h-3" />
+                    <span>{weather.wind}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Droplets className="w-3 h-3" />
+                    <span>{weather.humidity}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center py-4">
+              <div className="flex flex-col items-center gap-2 text-white/60">
+                <Cloud className="w-8 h-8 animate-pulse" />
+                <span className="text-xs">Fetching weather...</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
   );
 }
