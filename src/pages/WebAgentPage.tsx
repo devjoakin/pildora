@@ -34,9 +34,9 @@ export function WebAgentPage() {
                 model,
                 tools: [tools.webSearch()],
                 systemPrompt:
-                  'Eres un asistente que puede proporcionar información meteorológica actual 
-                  para cualquier ubicación utilizando la herramienta get_weather, y también 
-                  puede realizar búsquedas web si es necesario.',
+                  'Eres un asistente general. Para noticias, resultados recientes, 
+                  clima actual o cualquier dato de actualidad, usa webSearch antes de responder. 
+                  Luego entrega una respuesta clara y breve basada en esa busqueda.',
               });`,
             },
           ]}

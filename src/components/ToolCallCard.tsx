@@ -113,7 +113,6 @@ export function ToolCallCard({
   toolCall: ToolCallWithResult<AgentToolCalls | UnknownToolCall>;
 }) {
   const { call, result, state } = toolCall;
-
   if (call.name === 'send_email') {
     return (
       <EmailToolCallCard
@@ -314,8 +313,6 @@ function WebSearchToolCallCard({
   state: ToolCallState;
 }) {
   const isLoading = state === 'pending';
-  // const parsedResult = parseToolResult(result);
-  //const isError = parsedResult.status === 'error';
   const query = getWebSearchQuery(call.args);
 
   return (
