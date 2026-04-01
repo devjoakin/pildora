@@ -3,10 +3,9 @@ import { AgentChat, type AgentChatUi } from '../components/AgentChat';
 import { CodeSnippetSection } from '../components/CodeSnippetSection';
 
 const WEATHER_PAGE_UI: AgentChatUi = {
-  badge: 'Weather Agent',
+  badge: 'Agente del Clima',
   heading: 'Consulta clima o noticias en tiempo real',
-  emptyTitle:
-    'Pregunta por el clima de cualquier ciudad',
+  emptyTitle: 'Pregunta por el clima de cualquier ciudad',
   emptyDescription:
     'Este agente combina herramientas en tiempo real para responder de forma precisa.',
   placeholder: 'Ej: ¿Qué tiempo hace en Valencia? ¿Cómo están las noticias?',

@@ -102,7 +102,7 @@ export function AgentChat({
                 {stream.messages.map((message, index) => {
                   if (message.type === 'ai') {
                     const toolCalls = stream.getToolCalls(message);
-                    console.log('Tool calls for message',  toolCalls);
+                    console.log('Tool calls for message', toolCalls);
                     if (toolCalls.length > 0) {
                       return (
                         <div key={message.id} className="flex flex-col gap-3">

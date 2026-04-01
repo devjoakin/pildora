@@ -3,7 +3,7 @@ import { AgentChat, type AgentChatUi } from '../components/AgentChat';
 import { CodeSnippetSection } from '../components/CodeSnippetSection';
 
 const EMAIL_PAGE_UI: AgentChatUi = {
-  badge: 'CV Agent',
+  badge: 'Agente CV',
   heading: 'Responde sobre mi curriculum',
   emptyTitle: 'Haz preguntas sobre el contenido del CV',
   emptyDescription:
@@ -33,20 +33,34 @@ export function CvAgentPage() {
               export const searchCurriculum = tool(
                 async ({ question }) => {
                   try {
-                    const retriever = await getCvRetriever();
-                    const docs = await retriever.invoke(question);
+                    const vectorStore = await getCvVectorStore();
+                    const matches = await vectorStore.similaritySearchWithScore(question, 4);
+
+                    if (matches.length === 0) {
+                      return toolResponse(
+                        'not_found',
+                        'No encontré información suficiente en el CV para responder 
+                        con confianza.',
+                      );
+                    }
                     ....
-                    const context = 
-                      docs.map((doc) => doc.pageContent).join('');
-                    return JSON.stringify({ 
-                      status: 'found', 
-                      content: context 
-                    });
+
+                    const context = matches
+                      .map(
+                        ([doc, score]: [DocumentInterface, number], index: number) =>
+                          "[Fragmento " + (index + 1) + " | 
+                           score=" + score.toFixed(3) + "] " + doc.pageContent,
+                      )
+                      .join('');
+                    return toolResponse('found', context)
+                    
                   } catch (error) {
-                    return JSON.stringify({ 
-                      status: 'found', 
-                      content: context 
-                    });
+                    return toolResponse(
+                      'error',
+                      error instanceof Error
+                        ? 'No se pudo leer o indexar el CV: ' + error.message
+                        : 'No se pudo leer o indexar el CV.',
+                    );
                   }
                 },
                 {
@@ -56,15 +70,15 @@ export function CvAgentPage() {
               );`,
             },
             {
-              title: 'Fallback con Resend',
+              title: 'Envío de email con Resend',
               language: 'ts',
               code: `
               export const sendEmail = tool(
                 async ({ question }) => {
                   const resend = new Resend(process.env.RESEND_API_KEY);
                   const { data, error } = await resend.emails.send({
-                    from: process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev',
-                    to: [process.env.CV_FALLBACK_EMAIL as string],
+                    from: 'onboarding@resend.dev',
+                    to: 'user@example.com',
                     subject: 'Nueva pregunta sin respuesta del agente CV',
                     html: \`<p>Pregunta sin respuesta:</p><blockquote>\${question}</blockquote>\`,
                   });
@@ -85,7 +99,7 @@ export function CvAgentPage() {
               code: `
               export const cvAgent = createAgent({
                 model,
-               tools: [searchCurriculum, sendEmail],
+                tools: [searchCurriculum, sendEmail],
                 systemPrompt:
                   'Eres un asistente que responde preguntas exclusivamente basadas en el CV 
                   del usuario.  Primero llama a search_curriculum. Si devuelve status found, 

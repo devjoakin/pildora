@@ -3,7 +3,7 @@ import { AgentChat, type AgentChatUi } from '../components/AgentChat';
 import { CodeSnippetSection } from '../components/CodeSnippetSection';
 
 const WEB_PAGE_UI: AgentChatUi = {
-  badge: 'Web Agent',
+  badge: 'Agente Web',
   heading: 'Consulta  noticias en tiempo real',
   emptyTitle: 'Pregunta  por noticias actuales',
   emptyDescription:

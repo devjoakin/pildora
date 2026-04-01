@@ -3,7 +3,7 @@ import { AgentChat, type AgentChatUi } from '../components/AgentChat';
 import { CodeSnippetSection } from '../components/CodeSnippetSection';
 
 const TRAVEL_PAGE_UI: AgentChatUi = {
-  badge: 'Travel Agent',
+  badge: 'Agente de viajes',
   heading: 'Planifica viajes con subagentes',
   emptyTitle: 'Supervisor + subagentes en una sola experiencia',
   emptyDescription:

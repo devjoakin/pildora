@@ -3,8 +3,8 @@ import { AgentChat, type AgentChatUi } from '../components/AgentChat';
 import { CodeSnippetSection } from '../components/CodeSnippetSection';
 
 const OCCUPATION_SLACK_PAGE_UI: AgentChatUi = {
-  badge: 'Occupation + Slack Agent',
-  heading: 'Segmenta usuarios y notifica por Slack',
+  badge: 'Agente Ocupación',
+  heading: 'Consulta usuarios y notifica por Slack',
   emptyTitle: 'Consulta usuarios con hasOccupation=false',
   emptyDescription:
     'Este agente usa MCP preconstruido para Postgres (Neon) y envia DMs en Slack usando SLACK_USER_TOKEN.',

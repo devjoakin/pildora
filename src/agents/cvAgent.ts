@@ -12,6 +12,7 @@ const model = new ChatOpenAI({ model: 'gpt-4o-mini' });
 const embeddings = new OpenAIEmbeddings({ model: 'text-embedding-3-small' });
 const curriculumUrl = new URL('../assets/cv.pdf', import.meta.url);
 
+const MIN_RELEVANCE_SCORE = 0.35;
 type ToolStatus = 'found' | 'not_found' | 'error' | 'success';
 
 function toolResponse(status: ToolStatus, content: string, data?: unknown) {
@@ -43,9 +44,7 @@ function getEnv(...names: string[]) {
   return null;
 }
 
-let cvRetrieverPromise: Promise<
-  ReturnType<MemoryVectorStore['asRetriever']>
-> | null = null;
+let cvVectorStorePromise: Promise<MemoryVectorStore> | null = null;
 
 async function extractPdfText() {
   const buffer = await readFile(curriculumUrl);
@@ -59,7 +58,7 @@ async function extractPdfText() {
   }
 }
 
-async function buildCvRetriever() {
+async function buildCvVectorStore() {
   const cvText = await extractPdfText();
 
   const splitter = new RecursiveCharacterTextSplitter({
@@ -73,19 +72,15 @@ async function buildCvRetriever() {
     metadata: { chunk: index + 1 },
   }));
 
-  const vectorStore = await MemoryVectorStore.fromDocuments(
-    documents,
-    embeddings,
-  );
-  return vectorStore.asRetriever({ k: 4 });
+  return MemoryVectorStore.fromDocuments(documents, embeddings);
 }
 
-async function getCvRetriever() {
-  if (!cvRetrieverPromise) {
-    cvRetrieverPromise = buildCvRetriever();
+async function getCvVectorStore() {
+  if (!cvVectorStorePromise) {
+    cvVectorStorePromise = buildCvVectorStore();
   }
 
-  return cvRetrieverPromise;
+  return cvVectorStorePromise;
 }
 
 const searchCurriculumInputSchema = z.object({
@@ -98,20 +93,28 @@ const searchCurriculumInputSchema = z.object({
 export const searchCurriculum = tool(
   async ({ question }) => {
     try {
-      const retriever = await getCvRetriever();
-      const docs = await retriever.invoke(question);
+      const vectorStore = await getCvVectorStore();
+      const matches = await vectorStore.similaritySearchWithScore(question, 4);
 
-      if (docs.length === 0) {
+      if (matches.length === 0) {
         return toolResponse(
           'not_found',
           'No encontré información suficiente en el CV para responder con confianza.',
         );
       }
 
-      const context = docs
+      const bestScore = matches[0][1];
+      if (bestScore < MIN_RELEVANCE_SCORE) {
+        return toolResponse(
+          'not_found',
+          'No encontré una coincidencia suficientemente relevante en el CV para responder con confianza.',
+        );
+      }
+
+      const context = matches
         .map(
-          (doc: DocumentInterface, index: number) =>
-            `[Fragmento ${index + 1}] ${doc.pageContent}`,
+          ([doc, score]: [DocumentInterface, number], index: number) =>
+            `[Fragmento ${index + 1} | score=${score.toFixed(3)}] ${doc.pageContent}`,
         )
         .join('\n\n');
 
@@ -192,6 +195,9 @@ export const sendEmail = tool(
 export const cvAgent = createAgent({
   model,
   tools: [searchCurriculum, sendEmail],
-  systemPrompt:
-    'Eres un asistente que responde preguntas exclusivamente basadas en el CV del usuario. Primero llama a search_curriculum. Si devuelve status found, responde solo con esos fragmentos sin inventar datos. Si devuelve status not_found o no es suficiente para responder con confianza, llama a send_email con la pregunta y luego informa que se ha enviado un email de seguimiento.',
+  systemPrompt: `Eres un asistente que responde preguntas exclusivamente basadas en el CV del usuario. 
+    SIEMPRE llama search_curriculum primero para cada pregunta del usuario. Si devuelve 
+    status found, responde solo con esos fragmentos sin inventar datos. Si devuelve status 
+    not_found o no es suficiente para responder con confianza, llama send_email con la 
+    pregunta exacta y luego informa que se ha enviado un email de seguimiento.`,
 });
