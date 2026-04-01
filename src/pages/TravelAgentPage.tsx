@@ -7,13 +7,13 @@ const TRAVEL_PAGE_UI: AgentChatUi = {
   heading: 'Planifica viajes con subagentes',
   emptyTitle: 'Supervisor + subagentes en una sola experiencia',
   emptyDescription:
-    'El supervisor coordina subagentes de clima, plan diario y envio por email para responder mejor.',
+    'El supervisor coordina subagentes de alojamiento, plan diario y envio por email para responder mejor.',
   placeholder: 'Ej: Planea 3 dias en Lisboa para pareja foodie y enviamelo',
   icon: Map,
   suggestions: [
     'Planea un finde de 2 dias en Sevilla',
     'Itinerario de 5 dias en Tokio con presupuesto medio',
-    'Haz plan para Berlin y envialo por email',
+    'Haz plan para de 3 dias en Berlin y envialo por email',
   ],
 };
 
@@ -27,21 +27,21 @@ export function TravelAgentPage() {
           title="Como se implementa el supervisor con subagentes"
           items={[
             {
-              title: 'Subagente de clima como tool',
+              title: 'Subagente de alojamiento como tool',
               language: 'ts',
               code: `
-                const weatherSpecialist = createAgent({
+                const accommodationSpecialist = createAgent({
                   model,
-                  tools: [getWeather],
-                  systemPrompt: 'You are a weather specialist...',
+                  tools: [],
+                  systemPrompt: 'You are an accommodation specialist...',
                 });
 
-                export const askWeatherSpecialist = tool(
-                  async ({ destination }) => {
-                    const result = await weatherSpecialist.invoke({
+                export const askAccommodationSpecialist = tool(
+                  async ({ destination, days, budget }) => {
+                    const result = await accommodationSpecialist.invoke({
                     messages: [{ 
                       role: 'user', 
-                       content: \`Consulta el clima de \${destination}\` 
+                       content: \`Recomiendame alojamiento en \${destination}\` 
                       }],
                     });
                     return JSON.stringify({ 
@@ -50,8 +50,8 @@ export function TravelAgentPage() {
                     });
                   },
                   { 
-                    name: 'ask_weather_specialist', 
-                    schema: z.object({ destination: z.string() }) 
+                    name: 'ask_accommodation_specialist', 
+                    schema: z.object({ destination: z.string(), days: z.number(), budget: z.string().optional() }) 
                   },
                 );`,
             },
@@ -62,12 +62,12 @@ export function TravelAgentPage() {
               export const travelAgent = createAgent({
                 model,
                 tools: [
-                  askWeatherSpecialist, 
+                  askAccommodationSpecialist, 
                   askPlannerSpecialist, 
                   emailTripPlan
                 ],
                 systemPrompt:
-                  'First call weather + planner subagents. 
+                  'First call accommodation + planner subagents. 
                   If user asks, send itinerary via email.',
               });`,
             },

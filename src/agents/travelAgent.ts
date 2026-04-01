@@ -2,7 +2,6 @@ import { ChatOpenAI } from '@langchain/openai';
 import { createAgent, tool } from 'langchain';
 import { Resend } from 'resend';
 import { z } from 'zod/v4';
-import { getWeather } from './weatherAgent';
 
 const model = new ChatOpenAI({ model: 'gpt-4o-mini' });
 
@@ -63,11 +62,11 @@ function getEnv(...names: string[]) {
   return null;
 }
 
-const weatherSpecialist = createAgent({
+const accommodationSpecialist = createAgent({
   model,
-  tools: [getWeather],
+  tools: [],
   systemPrompt:
-    'You are a weather specialist. Use get_weather and return concise weather information in Spanish.',
+    'You are an accommodation specialist. Provide practical lodging recommendations in Spanish based on destination, trip length, and budget. Include suggested zones/neighborhoods, lodging type, and booking tips.',
 });
 
 const itinerarySpecialist = createAgent({
@@ -77,13 +76,18 @@ const itinerarySpecialist = createAgent({
     'You are a travel itinerary specialist. Create practical day-by-day plans in Spanish with morning/afternoon/night structure and a short budget estimate.',
 });
 
-export const askWeatherSpecialist = tool(
-  async ({ destination }) => {
-    const result = await weatherSpecialist.invoke({
+export const askAccommodationSpecialist = tool(
+  async ({ destination, days, budget }) => {
+    const result = await accommodationSpecialist.invoke({
       messages: [
         {
           role: 'user',
-          content: `Consulta el clima actual para ${destination} y dame un resumen util para planificar viaje.`,
+          content: [
+            `Recomiendame alojamiento para ${destination}.`,
+            `Duracion: ${days} dias.`,
+            budget ? `Presupuesto: ${budget}.` : 'Presupuesto: flexible.',
+            'Devuelve: zonas recomendadas, tipo de alojamiento ideal, rango de precio orientativo por noche y consejos practicos para reservar.',
+          ].join(' '),
         },
       ],
     });
@@ -95,17 +99,19 @@ export const askWeatherSpecialist = tool(
     });
   },
   {
-    name: 'ask_weather_specialist',
+    name: 'ask_accommodation_specialist',
     description:
-      'Ask the weather subagent for destination weather context before planning.',
+      'Ask the accommodation subagent for lodging recommendations before planning.',
     schema: z.object({
       destination: z.string().min(2),
+      days: z.number().int().min(1).max(14),
+      budget: z.string().optional(),
     }),
   },
 );
 
 export const askPlannerSpecialist = tool(
-  async ({ destination, days, interests, budget, weatherSummary }) => {
+  async ({ destination, days, interests, budget, accommodationSummary }) => {
     const result = await itinerarySpecialist.invoke({
       messages: [
         {
@@ -115,9 +121,9 @@ export const askPlannerSpecialist = tool(
             `Duracion: ${days} dias.`,
             interests ? `Intereses: ${interests}.` : 'Intereses: general.',
             budget ? `Presupuesto: ${budget}.` : 'Presupuesto: flexible.',
-            weatherSummary
-              ? `Contexto de clima: ${weatherSummary}.`
-              : 'Sin contexto de clima disponible.',
+            accommodationSummary
+              ? `Contexto de alojamiento: ${accommodationSummary}.`
+              : 'Sin contexto de alojamiento disponible.',
             'Responde en espanol con secciones Dia 1, Dia 2, etc. y recomendaciones accionables.',
           ].join(' '),
         },
@@ -139,7 +145,7 @@ export const askPlannerSpecialist = tool(
       days: z.number().int().min(1).max(14),
       interests: z.string().optional(),
       budget: z.string().optional(),
-      weatherSummary: z.string().optional(),
+      accommodationSummary: z.string().optional(),
     }),
   },
 );
@@ -205,7 +211,14 @@ export const emailTripPlan = tool(
 
 export const travelAgent = createAgent({
   model,
-  tools: [askWeatherSpecialist, askPlannerSpecialist, emailTripPlan],
-  systemPrompt:
-    'You are a supervisor travel agent coordinating subagents. First gather destination and trip length. Then call ask_weather_specialist and ask_planner_specialist to build the final itinerary. If the user asks to send or share the itinerary by email, call email_trip_plan. Always respond in Spanish and do not claim actions you did not execute.',
+  tools: [askAccommodationSpecialist, askPlannerSpecialist, emailTripPlan],
+  systemPrompt: `Eres un supervisor de agentes de viajes coordiando subagentes. Primero obtén el destino y la duración del viaje.
+    En caso de no proporcionar el presupuesto (budget), asume que es medio. En caso de no poroocionar la duración, asume 5 días.
+    Después llama a ask_accommodation_specialist y ask_planner_specialist para construir el itinerario final. 
+    Si el usuario solicita enviar o compartir el itinerario por email, llama a email_trip_plan.`,
+  // systemPrompt:
+  //   `You are a supervisor travel agent coordinating subagents. First gather destination and trip length.
+  //   Then call ask_accommodation_specialist and ask_planner_specialist to build the final itinerary.
+  //   If the user asks to send or share the itinerary by email, call email_trip_plan.
+  //   Always respond in Spanish and do not claim actions you did not execute.`,
 });

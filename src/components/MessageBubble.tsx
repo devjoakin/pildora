@@ -11,6 +11,8 @@ const BUBBLE_STYLES = {
   ai: 'bg-orange-50/70 border border-orange-200/80 text-slate-800 rounded-2xl px-4 py-2.5',
 } as const;
 
+type AssistantVariant = 'default' | 'accommodation' | 'planner';
+
 /**
  * Extract text content from a message
  */
@@ -150,7 +152,13 @@ function MarkdownContent({ content }: { content: string }) {
  * MessageBubble component that renders human and AI text messages.
  * Tool calls are handled separately by ToolCallCard.
  */
-export function MessageBubble({ message }: { message: Message }) {
+export function MessageBubble({
+  message,
+  assistantVariant = 'default',
+}: {
+  message: Message;
+  assistantVariant?: AssistantVariant;
+}) {
   const content = getTextContent(message);
 
   /**
@@ -168,7 +176,7 @@ export function MessageBubble({ message }: { message: Message }) {
     return <HumanBubble content={content} />;
   }
 
-  return <AssistantBubble message={message} />;
+  return <AssistantBubble message={message} variant={assistantVariant} />;
 }
 
 /**
@@ -203,7 +211,12 @@ function SystemBubble({ content }: { content: string }) {
 /**
  * Assistant message bubble with reasoning bubble if it exists
  */
-function AssistantBubble({ message }: { message: Message }) {
+function AssistantBubble({
+  message,
+}: {
+  message: Message;
+  variant: AssistantVariant;
+}) {
   const content = getTextContent(message);
   const reasoning = getReasoningFromMessage(message);
 

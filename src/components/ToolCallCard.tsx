@@ -24,8 +24,8 @@ import type {
   sendEmail,
 } from '../agents/cvAgent';
 import type {
+  askAccommodationSpecialist,
   askPlannerSpecialist,
-  askWeatherSpecialist,
   emailTripPlan,
   travelAgent as TravelToolCallingAgent,
 } from '../agents/travelAgent';
@@ -57,7 +57,7 @@ export type AgentToolCalls =
   /**
    * Infer tool call from travel subagent tools
    */
-  | ToolCallFromTool<typeof askWeatherSpecialist>
+  | ToolCallFromTool<typeof askAccommodationSpecialist>
   | ToolCallFromTool<typeof askPlannerSpecialist>
   | ToolCallFromTool<typeof emailTripPlan>
   /**
@@ -132,7 +132,7 @@ export function ToolCallCard({
   }
 
   if (
-    call.name === 'ask_weather_specialist' ||
+    call.name === 'ask_accommodation_specialist' ||
     call.name === 'ask_planner_specialist' ||
     call.name === 'email_trip_plan'
   ) {
@@ -140,7 +140,7 @@ export function ToolCallCard({
       <TravelToolCallCard
         call={
           call as
-            | ToolCallFromTool<typeof askWeatherSpecialist>
+            | ToolCallFromTool<typeof askAccommodationSpecialist>
             | ToolCallFromTool<typeof askPlannerSpecialist>
             | ToolCallFromTool<typeof emailTripPlan>
         }
@@ -342,7 +342,7 @@ function TravelToolCallCard({
   state,
 }: {
   call:
-    | ToolCallFromTool<typeof askWeatherSpecialist>
+    | ToolCallFromTool<typeof askAccommodationSpecialist>
     | ToolCallFromTool<typeof askPlannerSpecialist>
     | ToolCallFromTool<typeof emailTripPlan>;
   result?: ToolMessage;
@@ -352,20 +352,45 @@ function TravelToolCallCard({
   const parsedResult = parseToolResult(result);
   const isError = parsedResult.status === 'error';
 
+  const toneByTool: Record<
+    typeof call.name,
+    { border: string; panel: string; text: string }
+  > = {
+    ask_accommodation_specialist: {
+      border: 'border-cyan-200',
+      panel: 'bg-cyan-50',
+      text: 'text-cyan-800',
+    },
+    ask_planner_specialist: {
+      border: 'border-violet-200',
+      panel: 'bg-violet-50',
+      text: 'text-violet-800',
+    },
+    email_trip_plan: {
+      border: 'border-emerald-200',
+      panel: 'bg-emerald-50',
+      text: 'text-emerald-800',
+    },
+  };
+
   const labelByTool: Record<typeof call.name, string> = {
-    ask_weather_specialist: 'Subagente clima',
+    ask_accommodation_specialist: 'Subagente alojamiento',
     ask_planner_specialist: 'Subagente planner',
     email_trip_plan: 'Subagente email',
   };
 
+  const tone = toneByTool[call.name];
+
   return (
-    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm animate-fade-in">
-      <div className="mb-3 flex items-center gap-2 text-xs text-slate-500">
+    <div
+      className={`relative overflow-hidden rounded-xl border bg-white p-3 shadow-sm animate-fade-in ${tone.border}`}
+    >
+      <div className="flex items-center gap-2 text-xs text-slate-500">
         <MapPin className="h-4 w-4 text-slate-700" />
         <span className="font-medium text-slate-700">
           {labelByTool[call.name]}
         </span>
-        {isLoading && <Loader2 className="ml-auto h-3.5 w-3.5 animate-spin" />}
+        {isLoading && <Loader2 className="ml-auto h-1.5 w-3.5 animate-spin" />}
       </div>
 
       <p className="text-sm text-slate-600 break-words">
@@ -374,13 +399,13 @@ function TravelToolCallCard({
 
       {parsedResult.content && (
         <div
-          className={`mt-3 rounded-lg border px-3 py-2 text-sm ${
+          className={`mt-2 rounded-lg border px-3 py-2 text-sm whitespace-pre-wrap ${
             isError
               ? 'border-red-200 bg-red-50 text-red-700'
-              : 'border-emerald-200 bg-emerald-50 text-emerald-700'
+              : `${tone.border} ${tone.panel} ${tone.text}`
           }`}
         >
-          <span>{parsedResult.content}</span>
+          {parsedResult.content}
         </div>
       )}
     </div>
@@ -587,7 +612,7 @@ function WeatherToolCallCard({
             <span className="font-medium text-slate-800">Ubicación:</span>{' '}
             {call.args.location}
           </p>
-        )} 
+        )}
       </div>
       <div className="relative overflow-hidden rounded-xl animate-fade-in">
         {/* Sky gradient background */}
