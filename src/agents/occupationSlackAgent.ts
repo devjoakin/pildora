@@ -30,25 +30,39 @@ function getEnv(...names: string[]) {
 }
 
 const postgresUrl = getEnv('POSTGRES_URL', 'DATABASE_URL');
+const slackBotToken = getEnv('SLACK_BOT_TOKEN');
+
 const postgresPool = postgresUrl
   ? new Pool({
       connectionString: postgresUrl,
     })
   : null;
 
-const mcpClient = postgresUrl
-  ? new MultiServerMCPClient({
-      useStandardContentBlocks: true,
-      onConnectionError: 'ignore',
-      mcpServers: {
-        db: {
-          transport: 'stdio',
-          command: 'npx',
-          args: ['-y', '@modelcontextprotocol/server-postgres', postgresUrl],
-        },
-      },
-    })
-  : null;
+const mcpServers: {
+  [name: string]: {
+    transport: 'stdio';
+    command: string;
+    args: string[];
+    env?: Record<string, string>;
+  };
+} = {};
+
+if (postgresUrl) {
+  mcpServers.db = {
+    transport: 'stdio',
+    command: 'npx',
+    args: ['-y', '@modelcontextprotocol/server-postgres', postgresUrl],
+  };
+}
+
+const mcpClient =
+  Object.keys(mcpServers).length > 0
+    ? new MultiServerMCPClient({
+        useStandardContentBlocks: true,
+        onConnectionError: 'ignore',
+        mcpServers,
+      })
+    : null;
 
 const mcpTools = mcpClient ? await mcpClient.getTools() : [];
 
@@ -96,7 +110,7 @@ async function fetchUsersMissingOccupation(limit: number) {
   }
 }
 
-async function sendSlackReminders({
+async function sendSlackBotReminders({
   recipients,
   message,
   dryRun,
@@ -131,11 +145,10 @@ async function sendSlackReminders({
     };
   }
 
-  const slackUserToken = getEnv('SLACK_USER_TOKEN');
-  if (!slackUserToken) {
+  if (!slackBotToken) {
     return {
       status: 'error' as const,
-      content: 'Missing SLACK_USER_TOKEN in .env.',
+      content: 'Missing SLACK_BOT_TOKEN in .env.',
       data: undefined,
     };
   }
@@ -150,7 +163,7 @@ async function sendSlackReminders({
         {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${slackUserToken}`,
+            Authorization: `Bearer ${slackBotToken}`,
             'Content-Type': 'application/json; charset=utf-8',
           },
           body: JSON.stringify({ users: user.slack_user_id }),
@@ -184,7 +197,7 @@ async function sendSlackReminders({
         {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${slackUserToken}`,
+            Authorization: `Bearer ${slackBotToken}`,
             'Content-Type': 'application/json; charset=utf-8',
           },
           body: JSON.stringify({
@@ -250,7 +263,7 @@ const getUsersMissingOccupation = tool(
 
 const notifyUsersInSlack = tool(
   async ({ recipients, message, dryRun, maxRecipients }) => {
-    const result = await sendSlackReminders({
+    const result = await sendSlackBotReminders({
       recipients,
       message,
       dryRun,
@@ -266,7 +279,7 @@ const notifyUsersInSlack = tool(
   {
     name: 'notify_users_in_slack',
     description:
-      'Envia mensajes directos de Slack con SLACK_USER_TOKEN a recipients filtrados.',
+      'Envia mensajes directos en Slack usando SLACK_BOT_TOKEN para recipients filtrados.',
     schema: z.object({
       recipients: z
         .array(
@@ -280,7 +293,7 @@ const notifyUsersInSlack = tool(
         .min(1)
         .max(200),
       message: z.string().min(5).default(DEFAULT_MESSAGE),
-      dryRun: z.boolean().default(true),
+      dryRun: z.boolean().default(false),
       maxRecipients: z.number().int().min(1).max(50).default(20),
     }),
   },
@@ -296,7 +309,7 @@ const notifyUsersMissingOccupation = tool(
       });
     }
 
-    const notify = await sendSlackReminders({
+    const notify = await sendSlackBotReminders({
       recipients: query.recipients,
       message,
       dryRun,
@@ -315,7 +328,7 @@ const notifyUsersMissingOccupation = tool(
   {
     name: 'notify_users_missing_occupation',
     description:
-      'Consulta usuarios sin ocupacion y les envia recordatorio en Slack en un solo paso.',
+      'Consulta usuarios sin ocupacion y les envia recordatorio por DM de Slack en un solo paso.',
     schema: z.object({
       message: z.string().min(5).default(DEFAULT_MESSAGE),
       dryRun: z.boolean().default(false),
@@ -334,5 +347,5 @@ export const occupationSlackAgent = createAgent({
     notifyUsersMissingOccupation,
   ] as any,
   systemPrompt:
-    'Eres un agente de operaciones. Si el usuario pide algo como "send reminders to users with no occupation", usa notify_users_missing_occupation. Para otras solicitudes, primero llama get_users_missing_occupation para obtener recipients sin SQL y luego notify_users_in_slack. Usa dryRun=true por defecto, salvo cuando el usuario pida explicitamente enviar mensajes (send reminders, envia recordatorios, send now), en cuyo caso usa dryRun=false. Si no hay texto personalizado, usa exactamente: "Debes rellenar tu ocupacion ya!!". No inventes resultados.',
+    'Eres un agente de operaciones. Si el usuario pide enviar recordatorios, usa notify_users_missing_occupation. Para otras solicitudes, primero llama get_users_missing_occupation y luego notify_users_in_slack. Usa dryRun=false cuando pidan enviar ahora. Si falta token, explica que se necesita SLACK_BOT_TOKEN en .env. Mensaje por defecto: "Debes rellenar tu ocupacion ya!!". No inventes resultados.',
 });

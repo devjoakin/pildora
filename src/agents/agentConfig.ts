@@ -6,6 +6,7 @@ import {
   type LucideIcon,
   CloudSun,
   FileUser,
+  BriefcaseBusiness,
 } from 'lucide-react';
 
 export type AgentId =
@@ -14,7 +15,8 @@ export type AgentId =
   | 'cvAgent'
   | 'travelAgent'
   | 'webAgent'
-  | 'occupationSlackAgent';
+  | 'occupationSlackAgent'
+  | 'hiringOpsMcpAgent';
 
 export interface AgentUiConfig {
   id: AgentId;
@@ -66,5 +68,12 @@ export const AGENT_CONFIGS: AgentUiConfig[] = [
     title: 'Agente ocupacion',
     heading: 'Consulta usuarios y envia mensajes en Slack',
     icon: UserRoundX,
+  },
+  {
+    id: 'hiringOpsMcpAgent',
+    route: 'agents/hiring-ops-mcp',
+    title: 'Hiring Ops MCP',
+    heading: 'Orquesta Postgres + Slack MCP',
+    icon: BriefcaseBusiness,
   },
 ];
