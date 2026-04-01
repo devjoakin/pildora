@@ -66,15 +66,12 @@ export function AgentChat({
   };
 
   return (
-    <div className="relative flex h-full flex-col overflow-hidden bg-slate-100">
+    <div className="relative flex h-full overflow-hidden bg-slate-100">
       <div className="pointer-events-none absolute inset-x-0 -top-24 mx-auto h-72 w-[42rem] rounded-full bg-orange-200/45 blur-3xl" />
       <div className="pointer-events-none absolute -right-20 top-40 h-72 w-72 rounded-full bg-sky-200/40 blur-3xl" />
 
-      <main ref={scrollRef} className="relative z-10 flex-1 overflow-y-auto">
-        <div
-          ref={contentRef}
-          className="mx-auto w-full max-w-3xl px-4 py-8 sm:py-10"
-        >
+      <div className="relative z-10 mx-auto grid h-full w-full max-w-[1800px] grid-cols-1 gap-4 px-4 py-4 sm:px-6 lg:grid-cols-[75%_25%] lg:px-8">
+        <aside className="min-h-0 overflow-y-auto rounded-3xl border border-white/80 bg-white/75 p-4 shadow-[0_30px_80px_-55px_rgba(15,23,42,0.5)] backdrop-blur sm:p-6">
           <header className="mb-5 animate-rise-in px-1">
             <p className="text-xs font-medium uppercase tracking-[0.22em] text-slate-500">
               {ui.badge}
@@ -95,72 +92,87 @@ export function AgentChat({
           </div>
 
           {snippetSection}
+        </aside>
 
-          {(hasMessages || stream.isLoading) && (
-            <div className="animate-rise-in rounded-3xl border border-white/80 bg-white/85 p-4 shadow-[0_30px_80px_-55px_rgba(15,23,42,0.5)] backdrop-blur sm:p-6">
-              <div className="flex flex-col gap-6">
-                {stream.messages.map((message, index) => {
-                  if (message.type === 'ai') {
-                    const toolCalls = stream.getToolCalls(message);
-                    if (toolCalls.length > 0) {
-                      return (
-                        <div key={message.id} className="flex flex-col gap-3">
-                          {toolCalls.map((toolCall) => (
-                            <ToolCallCard
-                              key={
-                                toolCall.id ?? toolCall.call.id ?? message.id
-                              }
-                              toolCall={toolCall}
-                            />
-                          ))}
-                        </div>
-                      );
-                    }
+        <section className="min-h-0 rounded-3xl border border-white/80 bg-white/75 p-3 shadow-[0_30px_80px_-55px_rgba(15,23,42,0.5)] backdrop-blur sm:p-4">
+          <div className="flex h-full min-h-0 flex-col">
+            <main ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
+              <div ref={contentRef} className="px-1 py-2 sm:px-2">
+                {(hasMessages || stream.isLoading) && (
+                  <div className="animate-rise-in rounded-3xl border border-white/80 bg-white/85 p-4 shadow-[0_30px_80px_-55px_rgba(15,23,42,0.5)] backdrop-blur sm:p-6">
+                    <div className="flex flex-col gap-6">
+                      {stream.messages.map((message, index) => {
+                        if (message.type === 'ai') {
+                          const toolCalls = stream.getToolCalls(message);
+                          if (toolCalls.length > 0) {
+                            return (
+                              <div
+                                key={message.id}
+                                className="flex flex-col gap-3"
+                              >
+                                {toolCalls.map((toolCall) => (
+                                  <ToolCallCard
+                                    key={
+                                      toolCall.id ??
+                                      toolCall.call.id ??
+                                      message.id
+                                    }
+                                    toolCall={toolCall}
+                                  />
+                                ))}
+                              </div>
+                            );
+                          }
 
-                    if (!hasContent(message)) {
-                      return null;
-                    }
-                  }
+                          if (!hasContent(message)) {
+                            return null;
+                          }
+                        }
 
-                  return (
-                    <MessageBubble
-                      key={message.id ?? index}
-                      message={message}
-                    />
-                  );
-                })}
+                        return (
+                          <MessageBubble
+                            key={message.id ?? index}
+                            message={message}
+                          />
+                        );
+                      })}
 
-                {stream.isLoading &&
-                  !stream.messages.some((message) =>
-                    message.type === 'ai' ? hasContent(message) : false,
-                  ) &&
-                  stream.toolCalls.length === 0 && <LoadingIndicator />}
+                      {stream.isLoading &&
+                        !stream.messages.some((message) =>
+                          message.type === 'ai' ? hasContent(message) : false,
+                        ) &&
+                        stream.toolCalls.length === 0 && <LoadingIndicator />}
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-          )}
-        </div>
-      </main>
+            </main>
 
-      {stream.error != null && (
-        <div className="mx-auto w-full max-w-3xl px-4 pb-3">
-          <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-700">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 shrink-0" />
-              <span>
-                {stream.error instanceof Error
-                  ? stream.error.message
-                  : 'An error occurred'}
-              </span>
+            {stream.error != null && (
+              <div className="px-1 pb-3 pt-2 sm:px-2">
+                <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-700">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    <span>
+                      {stream.error instanceof Error
+                        ? stream.error.message
+                        : 'An error occurred'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="px-1 pb-1 pt-2 sm:px-2">
+              <MessageInput
+                disabled={stream.isLoading}
+                placeholder={ui.placeholder}
+                onSubmit={handleSubmit}
+              />
             </div>
           </div>
-        </div>
-      )}
-
-      <MessageInput
-        disabled={stream.isLoading}
-        placeholder={ui.placeholder}
-        onSubmit={handleSubmit}
-      />
+        </section>
+      </div>
     </div>
   );
 }

@@ -54,16 +54,6 @@ export function MessageInput({
             </button>
           </div>
 
-          <p className="mt-3 text-center text-xs text-slate-500">
-            <kbd className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-500">
-              Enter
-            </kbd>{' '}
-            para enviar ·{' '}
-            <kbd className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-500">
-              Shift + Enter
-            </kbd>{' '}
-            para una nueva linea
-          </p>
         </form>
       </div>
     </footer>

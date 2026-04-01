@@ -13,7 +13,7 @@ const TRAVEL_PAGE_UI: AgentChatUi = {
   suggestions: [
     'Planea un finde de 2 dias en Sevilla',
     'Itinerario de 5 dias en Tokio con presupuesto medio',
-    'Haz plan para de 3 dias en Berlin y envialo por email',
+    'Haz plan para hgdfdfsde 3 dias en Berlin y envialo por email',
   ],
 };
 
@@ -30,30 +30,103 @@ export function TravelAgentPage() {
               title: 'Subagente de alojamiento como tool',
               language: 'ts',
               code: `
+
                 const accommodationSpecialist = createAgent({
                   model,
-                  tools: [],
-                  systemPrompt: 'You are an accommodation specialist...',
-                });
-
+                  tools: [accomodationTool],
+                  systemPrompt:
+                    'Eres un especialista en alojamiento. 
+                    Proporciona recomendaciones de alojamiento basadas en destino, 
+                    duración del viaje y presupuesto. Incluye zonas/barrios 
+                    sugeridos, tipo de alojamiento y tips de reserva.',
+                }); 
+                   
                 export const askAccommodationSpecialist = tool(
                   async ({ destination, days, budget }) => {
-                    const result = await accommodationSpecialist.invoke({
-                    messages: [{ 
-                      role: 'user', 
-                       content: \`Recomiendame alojamiento en \${destination}\` 
-                      }],
-                    });
-                    return JSON.stringify({ 
-                      status: 'success', 
-                      content: extractTextFromAgentResult(result) 
-                    });
+                      const result = await accommodationSpecialist.invoke({
+                        messages: [
+                          {
+                            role: 'user',
+                            content: [
+                              Recomiendame alojamiento para {destination}.,
+                              Duracion: {days} dias.,
+                              budget ? Presupuesto: {budget}. : 'Presupuesto: flexible.',
+                              'Devuelve: zonas recomendadas, tipo de alojamiento ideal, 
+                              rango de precio orientativo por noche y consejos practicos para reservar.',
+                            ].join(' '),
+                          },
+                        ],
+                      });
+                      
+                      const summary = extractTextFromAgentResult(result);
+                      return JSON.stringify({
+                        status: summary ? 'success' : 'error',
+                        content: summary || 'No pude obtener el resumen del alojamiento.',
+                      });
                   },
-                  { 
-                    name: 'ask_accommodation_specialist', 
-                    schema: z.object({ destination: z.string(), days: z.number(), budget: z.string().optional() }) 
+                  {
+                      name: 'ask_accommodation_specialist',
+                      description:
+                        'Ask the accommodation subagent for lodging recommendations before planning.',
+                      schema: z.object({
+                        destination: z.string().min(2),
+                        days: z.number().int().min(1).max(14),
+                        budget: z.string().optional(),
+                      }),
+                    },
+                  }
+                )
+                `,
+            },
+            {
+              title: 'Subagente planificador como tool',
+              language: 'ts',
+              code: `
+                const plannerSpecialist = createAgent({
+                  model,
+                  tools: [interestsTool],
+                  systemPrompt:
+                    'Eres un especiliasta en planificador de viajes. 
+                    Crea practicos palnes diarios con una estructura
+                    de mañana/tarde/noche y una pequeña estimación de presupuesto diario.',
+                });
+                   
+                export const askPlannerSpecialist = tool(
+                  async ({ destination, days, budget }) => {
+                      const result = await plannerSpecialist .invoke({
+                        messages: [
+                          {
+                            role: 'user',
+                            content: [
+                              Crea un itinerario para {destination}.,
+                              Duracion: {days} dias.,
+                              interests ? Intereses: {interests}. : 'Intereses: general.',
+                              budget ? Presupuesto: {budget}. : 'Presupuesto: flexible.',
+                              accommodationSummary ? Contexto de alojamiento: {accommodationSummary}. : 'Sin contexto de alojamiento disponible.',
+                            ].join(' '),
+                          },
+                        ],
+                      });
+                      
+                      const itinerary = extractTextFromAgentResult(result);
+                      return JSON.stringify({
+                        status: itinerary ? 'success' : 'error',
+                        content: itinerary || 'No pude generar el itinerario.',
+                      });
                   },
-                );`,
+                  {
+                      name: 'ask_planner_specialist',
+                      description:
+                        destination: z.string().min(2),
+                        days: z.number().int().min(1).max(14),
+                        interests: z.string().optional(),
+                        budget: z.string().optional(),
+                        accommodationSummary: z.string().optional(),
+                      }),
+                    },
+                  }
+                )
+                `,
             },
             {
               title: 'Supervisor que orquesta subagentes',
@@ -67,8 +140,14 @@ export function TravelAgentPage() {
                   emailTripPlan
                 ],
                 systemPrompt:
-                  'First call accommodation + planner subagents. 
-                  If user asks, send itinerary via email.',
+                  'Eres un supervisor de agentes de viajes coordiando subagentes. 
+                   Primero obtén el destino y la duración del viaje.
+                   En caso de no proporcionar el presupuesto (budget), asume que es medio. 
+                   En caso de no poroocionar la duración, asume 5 días.
+                   Después llama a ask_accommodation_specialist y ask_planner_specialist 
+                   para construir el itinerario final. 
+                   Si el usuario solicita enviar o compartir el itinerario por email, 
+                   llama a email_trip_plan.',
               });`,
             },
           ]}
