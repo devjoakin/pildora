@@ -1,7 +1,7 @@
 {
   "node_version": "22",
   "graphs": {
-    "hiringOpsMcpAgent": "./src\\agents\\hiringOpsMcpAgent.ts:hiringOpsMcpAgent",
+    "occupationMcpAgent": "./src\\agents\\occupationMcpAgent.ts:occupationMcpAgent",
     "simpleAgent": "./src\\agents\\simpleAgent.ts:simpleAgent",
     "travelAgent": "./src\\agents\\travelAgent.ts:travelAgent",
     "weatherAgent": "./src\\agents\\weatherAgent.ts:weatherAgent",

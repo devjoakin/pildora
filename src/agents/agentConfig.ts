@@ -6,7 +6,6 @@ import {
   type LucideIcon,
   CloudSun,
   FileUser,
-  BriefcaseBusiness,
 } from 'lucide-react';
 
 export type AgentId =
@@ -15,8 +14,7 @@ export type AgentId =
   | 'cvAgent'
   | 'travelAgent'
   | 'webAgent'
-  | 'occupationSlackAgent'
-  | 'hiringOpsMcpAgent';
+  | 'occupationMcpAgent';
 
 export interface AgentUiConfig {
   id: AgentId;
@@ -58,8 +56,8 @@ export const AGENT_CONFIGS: AgentUiConfig[] = [
     icon: Map,
   },
   {
-    id: 'hiringOpsMcpAgent',
-    route: 'agents/hiring-ops-mcp',
+    id: 'occupationMcpAgent',
+    route: 'agents/occupation-mcp',
     title: 'Agente ocupación MCP',
     icon: UserRoundX,
   },

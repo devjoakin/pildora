@@ -2,7 +2,7 @@ import { useLayoutEffect } from 'react';
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { AgentSidebar } from './components/AgentSidebar';
 import { CvAgentPage } from './pages/CvAgentPage';
-import { HiringOpsMcpAgentPage } from './pages/HiringOpsMcpAgentPage';
+import { OccupationMcpAgentPage } from './pages/OccupationMcpAgentPage';
 import { TravelAgentPage } from './pages/TravelAgentPage';
 import { SimpleAgentPage } from './pages/SimpleAgentPage';
 import { WebAgentPage } from './pages/WebAgentPage';
@@ -43,8 +43,8 @@ function App() {
           <Route path="agents/cv" element={<CvAgentPage />} />
           <Route path="agents/travel" element={<TravelAgentPage />} />
           <Route
-            path="agents/hiring-ops-mcp"
-            element={<HiringOpsMcpAgentPage />}
+            path="agents/occupation-mcp"
+            element={<OccupationMcpAgentPage />}
           />
           <Route path="*" element={<Navigate to="/agents/simple" replace />} />
         </Route>

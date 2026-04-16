@@ -2,7 +2,7 @@ import { BriefcaseBusiness } from 'lucide-react';
 import { AgentChat, type AgentChatUi } from '../components/AgentChat';
 import { CodeSnippetSection } from '../components/CodeSnippetSection';
 
-const HIRING_OPS_MCP_PAGE_UI: AgentChatUi = {
+const OCCUPATION_MCP_PAGE_UI: AgentChatUi = {
   badge: 'Hiring Ops MCP',
   emptyTitle: 'Un solo agente, dos servidores MCP',
   emptyDescription:
@@ -12,16 +12,16 @@ const HIRING_OPS_MCP_PAGE_UI: AgentChatUi = {
   icon: BriefcaseBusiness,
   suggestions: [
     'Muestrame 5 usuarios de la tabla users',
-    'Cuantos usuarios tienen has_occupation=false?',
+    'Consulta los usuarios de la tabla users que tienen has_occupation en false',
     'Resume usuarios sin ocupacion y publicalo en #general-pidlora',
   ],
 };
 
-export function HiringOpsMcpAgentPage() {
+export function OccupationMcpAgentPage() {
   return (
     <AgentChat
-      assistantId="hiringOpsMcpAgent"
-      ui={HIRING_OPS_MCP_PAGE_UI}
+      assistantId="occupationMcpAgent"
+      ui={OCCUPATION_MCP_PAGE_UI}
       snippetSection={
         <CodeSnippetSection
           title="Orquestación con dos MCP"
@@ -55,16 +55,20 @@ export function HiringOpsMcpAgentPage() {
               });`,
             },
             {
-              title: 'Supervisor hiring ops',
+              title: 'Agente ocupacion con MCP tools',
               language: 'ts',
-              code: `const tools = await mcpClient.getTools();
+              code: `
+                const tools = await mcpClient.getTools();
 
-export const hiringOpsMcpAgent = createAgent({
-  model,
-  tools,
-  systemPrompt:
-    'Usa query para DB y conversations_add_message para publicar en Slack',
-});`,
+                export const occupationMcpAgent = createAgent({
+                  model,
+                  tools,
+                  systemPrompt:
+                    'Eres un agente que usa MCP de Postgres y Slack. Para DB, usa query solo 
+                    con SELECT. Para publicar en Slack, lista canales con channels_list y 
+                    publica con conversations_add_message. No inventes resultados ni 
+                    confirmes envios no ejecutados.',
+                });`,
             },
           ]}
         />

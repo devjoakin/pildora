@@ -34,7 +34,7 @@ import type {
   weatherAgent as WeatherToolCallingAgent,
 } from '../agents/weatherAgent';
 import type { webAgent as WebToolCallingAgent } from '../agents/webAgent';
-import type { hiringOpsMcpAgent as HiringOpsMcpToolCallingAgent } from '../agents/hiringOpsMcpAgent';
+import type { occupationMcpAgent as OccupationMcpToolCallingAgent } from '../agents/occupationMcpAgent';
 
 type UnknownToolCall = {
   name: string;
@@ -76,7 +76,7 @@ export type AgentToolCalls =
   /**
    * Infer tool call from hiring ops MCP agent
    */
-  | InferAgentToolCalls<typeof HiringOpsMcpToolCallingAgent>
+  | InferAgentToolCalls<typeof OccupationMcpToolCallingAgent>
   /**
    * Infer tool call from email agent instance
    */

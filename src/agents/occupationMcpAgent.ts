@@ -50,9 +50,9 @@ const tools =
       }).getTools()
     : [];
 
-export const hiringOpsMcpAgent = createAgent({
+export const occupationMcpAgent = createAgent({
   model,
   tools,
   systemPrompt:
-    'Eres un agente de Hiring Ops que usa MCP de Postgres y Slack. Para DB, usa query solo con SELECT. Para publicar en Slack, lista canales con channels_list y publica con conversations_add_message. No inventes resultados ni confirmes envios no ejecutados. Si falta configuracion, indica que variables faltan en .env.',
+    'Eres un agente que usa MCP de Postgres y Slack. Para DB, usa query solo con SELECT. Para publicar en Slack, lista canales con channels_list y publica con conversations_add_message. No inventes resultados ni confirmes envios no ejecutados. Si falta configuracion, indica que variables faltan en .env.',
 });

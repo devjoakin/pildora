@@ -5,9 +5,8 @@ import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { cvAgent } from '../agents/cvAgent';
 import type { AgentId } from '../agents/agentConfig';
-import type { hiringOpsMcpAgent } from '../agents/hiringOpsMcpAgent';
+import type { occupationMcpAgent } from '../agents/occupationMcpAgent';
 import type { weatherAgent } from '../agents/weatherAgent';
-import type { occupationSlackAgent } from '../agents/occupationSlackAgent';
 import type { travelAgent } from '../agents/travelAgent';
 import type { webAgent } from '../agents/webAgent';
 import { useStickToBottom } from 'use-stick-to-bottom';
@@ -53,9 +52,8 @@ export function AgentChat({
     | typeof weatherAgent
     | typeof cvAgent
     | typeof travelAgent
-    | typeof occupationSlackAgent
     | typeof webAgent
-    | typeof hiringOpsMcpAgent
+    | typeof occupationMcpAgent
   >({
     assistantId,
     apiUrl: 'http://localhost:2024',
