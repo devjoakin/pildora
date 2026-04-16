@@ -4,7 +4,6 @@ import { CodeSnippetSection } from '../components/CodeSnippetSection';
 
 const EMAIL_PAGE_UI: AgentChatUi = {
   badge: 'Agente CV',
-  heading: 'Responde sobre mi curriculum',
   emptyTitle: 'Haz preguntas sobre el contenido del CV',
   emptyDescription:
     'Este agente lee el PDF de tu curriculum y responde con esa base. Si no encuentra la respuesta, enviará un email de seguimiento.',

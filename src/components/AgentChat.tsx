@@ -19,7 +19,6 @@ import { ToolCallCard } from './ToolCallCard';
 
 export interface AgentChatUi {
   badge: string;
-  heading: string;
   emptyTitle: string;
   emptyDescription: string;
   placeholder: string;
@@ -72,15 +71,12 @@ export function AgentChat({
       <div className="pointer-events-none absolute inset-x-0 -top-24 mx-auto h-72 w-[42rem] rounded-full bg-orange-200/45 blur-3xl" />
       <div className="pointer-events-none absolute -right-20 top-40 h-72 w-72 rounded-full bg-sky-200/40 blur-3xl" />
 
-      <div className="relative z-10 mx-auto grid h-full w-full max-w-[1800px] grid-cols-1 gap-4 px-4 py-4 sm:px-6 lg:grid-cols-[75%_25%] lg:px-8">
+      <div className="relative z-10 mx-auto grid h-full w-full max-w-[1800px] grid-cols-1 gap-4 px-4 py-4 sm:px-6 lg:grid-cols-[50%_50%] lg:px-8">
         <aside className="min-h-0 overflow-y-auto rounded-3xl border border-white/80 bg-white/75 p-4 shadow-[0_30px_80px_-55px_rgba(15,23,42,0.5)] backdrop-blur sm:p-6">
           <header className="mb-5 animate-rise-in px-1">
             <p className="text-xs font-medium uppercase tracking-[0.22em] text-slate-500">
               {ui.badge}
             </p>
-            <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
-              {ui.heading}
-            </h1>
           </header>
 
           <div className="mb-5">

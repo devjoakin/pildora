@@ -3,7 +3,6 @@ import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { AgentSidebar } from './components/AgentSidebar';
 import { CvAgentPage } from './pages/CvAgentPage';
 import { HiringOpsMcpAgentPage } from './pages/HiringOpsMcpAgentPage';
-import { OccupationSlackAgentPage } from './pages/OccupationSlackAgentPage';
 import { TravelAgentPage } from './pages/TravelAgentPage';
 import { SimpleAgentPage } from './pages/SimpleAgentPage';
 import { WebAgentPage } from './pages/WebAgentPage';
@@ -43,10 +42,6 @@ function App() {
           <Route path="agents/web" element={<WebAgentPage />} />
           <Route path="agents/cv" element={<CvAgentPage />} />
           <Route path="agents/travel" element={<TravelAgentPage />} />
-          <Route
-            path="agents/occupation-slack"
-            element={<OccupationSlackAgentPage />}
-          />
           <Route
             path="agents/hiring-ops-mcp"
             element={<HiringOpsMcpAgentPage />}

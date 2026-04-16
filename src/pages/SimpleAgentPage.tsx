@@ -3,8 +3,7 @@ import { AgentChat, type AgentChatUi } from '../components/AgentChat';
 import { CodeSnippetSection } from '../components/CodeSnippetSection';
 
 const SIMPLE_PAGE_UI: AgentChatUi = {
-  badge: 'Simple Agent',
-  heading: 'Consulta cualquier cosa',
+  badge: 'Agente simple',
   emptyTitle:
     'Pregunta por cualquier cosa o tema de actualidad',
   emptyDescription:
@@ -31,6 +30,9 @@ export function SimpleAgentPage() {
               title: 'Creacion del simpleAgent',
               language: 'ts',
               code: `
+              import { createAgent } from 'langchain';
+              import { ChatOpenAI } from '@langchain/openai';
+
               const model = new ChatOpenAI({
                 model: 'gpt-4o-mini',
               });

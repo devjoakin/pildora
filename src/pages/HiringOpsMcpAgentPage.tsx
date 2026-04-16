@@ -4,7 +4,6 @@ import { CodeSnippetSection } from '../components/CodeSnippetSection';
 
 const HIRING_OPS_MCP_PAGE_UI: AgentChatUi = {
   badge: 'Hiring Ops MCP',
-  heading: 'Consulta DB y publica updates en Slack',
   emptyTitle: 'Un solo agente, dos servidores MCP',
   emptyDescription:
     'Este agente combina Postgres MCP para consultas y Slack MCP para publicar resúmenes operativos.',
@@ -30,25 +29,30 @@ export function HiringOpsMcpAgentPage() {
             {
               title: 'Config de servers MCP',
               language: 'ts',
-              code: `const mcpClient = new MultiServerMCPClient({
-  mcpServers: {
-    db: {
-      transport: 'stdio',
-      command: 'npx',
-      args: ['-y', '@modelcontextprotocol/server-postgres', process.env.POSTGRES_URL!],
-    },
-    slack: {
-      transport: 'stdio',
-      command: 'npx',
-      args: ['-y', 'slack-mcp-server@latest', '--transport', 'stdio'],
-      env: {
-        SLACK_MCP_XOXC_TOKEN: process.env.SLACK_MCP_XOXC_TOKEN!,
-        SLACK_MCP_XOXD_TOKEN: process.env.SLACK_MCP_XOXD_TOKEN!,
-        SLACK_MCP_ADD_MESSAGE_TOOL: 'true',
-      },
-    },
-  },
-});`,
+              code: `
+                const mcpClient = new MultiServerMCPClient({
+                  mcpServers: {
+                    db: {
+                      transport: 'stdio',
+                      command: 'npx',
+                      args: [
+                        '-y', 
+                        '@modelcontextprotocol/server-postgres', 
+                        process.env.POSTGRES_URL!
+                      ],
+                    },
+                    slack: {
+                      transport: 'stdio',
+                      command: 'npx',
+                      args: ['-y', 'slack-mcp-server@latest', '--transport', 'stdio'],
+                      env: {
+                        SLACK_MCP_XOXC_TOKEN: process.env.SLACK_MCP_XOXC_TOKEN!,
+                        SLACK_MCP_XOXD_TOKEN: process.env.SLACK_MCP_XOXD_TOKEN!,
+                        SLACK_MCP_ADD_MESSAGE_TOOL: 'true',
+                      },
+                    },
+                  },
+              });`,
             },
             {
               title: 'Supervisor hiring ops',

@@ -4,7 +4,6 @@ import { CodeSnippetSection } from '../components/CodeSnippetSection';
 
 const TRAVEL_PAGE_UI: AgentChatUi = {
   badge: 'Agente de viajes',
-  heading: 'Planifica viajes con subagentes',
   emptyTitle: 'Supervisor + subagentes en una sola experiencia',
   emptyDescription:
     'El supervisor coordina subagentes de alojamiento, plan diario y envio por email para responder mejor.',
@@ -13,7 +12,7 @@ const TRAVEL_PAGE_UI: AgentChatUi = {
   suggestions: [
     'Planea un finde de 2 dias en Sevilla',
     'Itinerario de 5 dias en Tokio con presupuesto medio',
-    'Haz plan para hgdfdfsde 3 dias en Berlin y envialo por email',
+    'Haz plan para 3 dias en Berlin y envialo por email',
   ],
 };
 

@@ -41,9 +41,6 @@ export function AgentSidebar() {
                         {agent.title}
                       </span>
                     </div>
-                    <p className="mt-1 text-xs text-slate-500">
-                      {agent.heading}
-                    </p>
                   </>
                 )}
               </NavLink>

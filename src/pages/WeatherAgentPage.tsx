@@ -4,16 +4,15 @@ import { CodeSnippetSection } from '../components/CodeSnippetSection';
 
 const WEATHER_PAGE_UI: AgentChatUi = {
   badge: 'Agente del Clima',
-  heading: 'Consulta clima o noticias en tiempo real',
   emptyTitle: 'Pregunta por el clima de cualquier ciudad',
   emptyDescription:
     'Este agente combina herramientas en tiempo real para responder de forma precisa.',
   placeholder: 'Ej: ¿Qué tiempo hace en Valencia? ¿Cómo están las noticias?',
   icon: CloudSun,
   suggestions: [
-    '¿Qué es React.js?',
+    '¿Qué clima hace en Tokyo?',
     '¿Qué tiempo hace en Alicante?',
-    '¿Quien ganó el último Open de Australia de tenis?',
+    '¿Qué temperatura hace en Madrid?',
   ],
 };
 
