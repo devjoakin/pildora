@@ -1,15 +1,15 @@
-import { BriefcaseBusiness } from 'lucide-react';
+import { UserRoundX } from 'lucide-react';
 import { AgentChat, type AgentChatUi } from '../components/AgentChat';
 import { CodeSnippetSection } from '../components/CodeSnippetSection';
 
 const OCCUPATION_MCP_PAGE_UI: AgentChatUi = {
-  badge: 'Hiring Ops MCP',
+  badge: 'Ocupación MCP',
   emptyTitle: 'Un solo agente, dos servidores MCP',
   emptyDescription:
-    'Este agente combina Postgres MCP para consultas y Slack MCP para publicar resúmenes operativos.',
+    'Este agente combina Postgres MCP para consultas y Slack MCP para publicar mesajes acerca de la ocupacion.',
   placeholder:
     'Ej: Busca usuarios sin ocupacion y publica un resumen en #general',
-  icon: BriefcaseBusiness,
+  icon: UserRoundX,
   suggestions: [
     'Muestrame 5 usuarios de la tabla users',
     'Consulta los usuarios de la tabla users que tienen has_occupation en false',
