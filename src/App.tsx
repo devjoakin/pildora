@@ -2,6 +2,7 @@ import { useLayoutEffect } from 'react';
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { AgentSidebar } from './components/AgentSidebar';
 import { CvAgentPage } from './pages/CvAgentPage';
+import { LandingPage } from './pages/LandingPage';
 import { OccupationMcpAgentPage } from './pages/OccupationMcpAgentPage';
 import { TravelAgentPage } from './pages/TravelAgentPage';
 import { SimpleAgentPage } from './pages/SimpleAgentPage';
@@ -35,19 +36,18 @@ function App() {
     <>
       <ScrollToTopOnRouteChange />
       <Routes>
-        <Route path="/" element={<AppLayout />}>
-          <Route index element={<Navigate to="/agents/simple" replace />} />
-          <Route path="agents/simple" element={<SimpleAgentPage />} />
-          <Route path="agents/weather" element={<WeatherAgentPage />} />
-          <Route path="agents/web" element={<WebAgentPage />} />
-          <Route path="agents/cv" element={<CvAgentPage />} />
-          <Route path="agents/travel" element={<TravelAgentPage />} />
-          <Route
-            path="agents/occupation-mcp"
-            element={<OccupationMcpAgentPage />}
-          />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/agents" element={<AppLayout />}>
+          <Route index element={<Navigate to="simple" replace />} />
+          <Route path="simple" element={<SimpleAgentPage />} />
+          <Route path="weather" element={<WeatherAgentPage />} />
+          <Route path="web" element={<WebAgentPage />} />
+          <Route path="cv" element={<CvAgentPage />} />
+          <Route path="travel" element={<TravelAgentPage />} />
+          <Route path="occupation-mcp" element={<OccupationMcpAgentPage />} />
           <Route path="*" element={<Navigate to="/agents/simple" replace />} />
         </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
   );
