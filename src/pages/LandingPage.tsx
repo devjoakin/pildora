@@ -28,8 +28,8 @@ export function LandingPage() {
             size="lg"
             className="border-orange-200 bg-orange-500 px-6 text-white hover:bg-orange-600"
           >
-            <Link to="/agents/simple">
-              Open agents simple
+            <Link to="/agents/introduction">
+              Start
               <ArrowRight className="size-4" />
             </Link>
           </Button>
