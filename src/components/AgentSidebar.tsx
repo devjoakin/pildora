@@ -7,9 +7,6 @@ export function AgentSidebar() {
     <aside className="relative border-b border-slate-200/80 bg-white/80 p-3 backdrop-blur md:w-72 md:border-b-0 md:border-r md:p-5">
       <div className="pointer-events-none absolute inset-x-6 -top-10 h-24 rounded-full bg-orange-100/70 blur-2xl md:inset-x-4" />
       <div className="relative">
-        <p className="text-xs font-medium uppercase tracking-[0.22em] text-slate-500">
-          Panel de agentes
-        </p>
         <h2 className="mt-2 text-lg font-semibold text-slate-900">
           Elige tu asistente
         </h2>
@@ -38,6 +35,10 @@ export function AgentSidebar() {
               </div>
             )}
           </NavLink>
+
+          <p className="px-1 pt-2 text-xs font-medium uppercase tracking-[0.22em] text-slate-500">
+            Panel de agentes
+          </p>
 
           {AGENT_CONFIGS.map((agent) => {
             const Icon = agent.icon;
