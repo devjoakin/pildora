@@ -51,7 +51,8 @@ export function TravelAgentPage() {
                               Duracion: {days} dias.,
                               budget ? Presupuesto: {budget}. : 'Presupuesto: flexible.',
                               'Devuelve: zonas recomendadas, tipo de alojamiento ideal, 
-                              rango de precio orientativo por noche y consejos practicos para reservar.',
+                              rango de precio orientativo por noche y consejos practicos 
+                              para reservar.',
                             ].join(' '),
                           },
                         ],
@@ -101,7 +102,9 @@ export function TravelAgentPage() {
                               Duracion: {days} dias.,
                               interests ? Intereses: {interests}. : 'Intereses: general.',
                               budget ? Presupuesto: {budget}. : 'Presupuesto: flexible.',
-                              accommodationSummary ? Contexto de alojamiento: {accommodationSummary}. : 'Sin contexto de alojamiento disponible.',
+                              accommodationSummary ? 
+                              Contexto de alojamiento: {accommodationSummary}. : 
+                              'Sin contexto de alojamiento disponible.',
                             ].join(' '),
                           },
                         ],

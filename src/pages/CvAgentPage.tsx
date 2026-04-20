@@ -79,7 +79,8 @@ export function CvAgentPage() {
                     from: 'onboarding@resend.dev',
                     to: 'user@example.com',
                     subject: 'Nueva pregunta sin respuesta del agente CV',
-                    html: \`<p>Pregunta sin respuesta:</p><blockquote>\${question}</blockquote>\`,
+                    html: 
+                      \`<p>Pregunta sin respuesta:</p><blockquote>\${question}</blockquote>\`,
                   });
                   return JSON.stringify(
                     error ? 
@@ -103,8 +104,9 @@ export function CvAgentPage() {
                   'Eres un asistente que responde preguntas exclusivamente basadas en el CV 
                   del usuario.  Primero llama a search_curriculum. Si devuelve status found, 
                   responde solo con esos fragmentos sin inventar datos. Si devuelve status 
-                  not_found o no es suficiente para responder con confianza, llama a send_email 
-                  con la pregunta y luego informa que se ha enviado un email de seguimiento.',
+                  not_found o no es suficiente para responder con confianza, llama a 
+                  send_email con la pregunta y luego informa que se ha enviado un email 
+                  de seguimiento.',
               });`,
             },
           ]}
