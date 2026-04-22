@@ -145,7 +145,7 @@ export function TravelAgentPage() {
                   'Eres un supervisor de agentes de viajes coordiando subagentes. 
                    Primero obtén el destino y la duración del viaje.
                    En caso de no proporcionar el presupuesto (budget), asume que es medio. 
-                   En caso de no poroocionar la duración, asume 5 días.
+                   En caso de no proporcionar la duración, asume 5 días.
                    Después llama a ask_accommodation_specialist y ask_planner_specialist 
                    para construir el itinerario final. 
                    Si el usuario solicita enviar o compartir el itinerario por email, 

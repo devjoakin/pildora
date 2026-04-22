@@ -29,6 +29,8 @@ export function WeatherAgentPage() {
               title: 'Tool get_weather',
               language: 'ts',
               code: `
+              import { tool } from 'langchain';
+
               export const getWeather = tool(
                 async ({ location }) => {
                   const geoResponse = await fetch(

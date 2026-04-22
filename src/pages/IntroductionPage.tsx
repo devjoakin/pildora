@@ -1,30 +1,31 @@
-import { BookOpenText, Bot, MessageSquareText, Wrench } from 'lucide-react';
+import { Bot,  Wrench, BrainCircuit, SearchCode } from 'lucide-react';
 
 const INTRO_TERMS = [
   {
-    title: 'Assistant ID',
+    title: 'Agente',
     description:
-      'Identificador unico del agente seleccionado para enrutar cada mensaje al flujo correcto.',
+      'Es un sistema que puede percibir, decidir y actuar para cumplir con su propósito.',
     icon: Bot,
   },
   {
-    title: 'Prompt',
+    title: 'Modelos',
     description:
-      'Instruccion inicial que define el rol, el tono y las reglas de respuesta del agente.',
-    icon: MessageSquareText,
+      'Modelos generales. Fine-tuning o entrenamiento específico.',
+    icon: BrainCircuit,
   },
   {
     title: 'Tools',
     description:
-      'Funciones externas que el agente puede ejecutar para traer datos en tiempo real o hacer acciones.',
+      'Ampliación de capacidades del agente.',
     icon: Wrench,
   },
   {
-    title: 'Contexto',
+    title: 'Concepto',
     description:
-      'Historial de conversacion y datos relevantes que permiten respuestas coherentes entre turnos.',
-    icon: BookOpenText,
+      'Ejemplo de pequeñas aplicaciones.',
+    icon: SearchCode,
   },
+  
 ];
 
 export function IntroductionPage() {
@@ -35,15 +36,15 @@ export function IntroductionPage() {
 
       <section className="relative z-10 mx-auto w-full max-w-4xl rounded-3xl border border-white/80 bg-white/75 p-6 shadow-[0_30px_80px_-55px_rgba(15,23,42,0.5)] backdrop-blur sm:p-8">
         <p className="text-xs font-medium tracking-[0.22em] text-slate-500 uppercase">
-          Introduction
+          Introducción
         </p>
         <h1 className="mt-3 text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
-          Conceptos clave para empezar
+          Pequeños apuntes antes de empezar
         </h1>
-        <p className="mt-3 text-sm text-slate-600 sm:text-base">
+        {/* <p className="mt-3 text-sm text-slate-600 sm:text-base">
           Antes de abrir un agente, revisa estos terminos para entender como
           funciona cada flujo.
-        </p>
+        </p> */}
 
         <ul className="mt-6 space-y-3">
           {INTRO_TERMS.map((term) => {

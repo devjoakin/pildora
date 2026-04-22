@@ -13,7 +13,7 @@ const OCCUPATION_MCP_PAGE_UI: AgentChatUi = {
   suggestions: [
     'Muestrame 5 usuarios de la tabla users',
     'Consulta los usuarios de la tabla users que tienen has_occupation en false',
-    'Resume usuarios sin ocupacion y publicalo en #general-pidlora',
+    'Consulta los usuarios de la tabla users, obtén usuarios que tienen has_occupation en false y publicalo en #general-pildora',
   ],
 };
 

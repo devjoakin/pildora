@@ -12,14 +12,13 @@ export function LandingPage() {
 
       <section className="relative z-10 mx-auto w-full max-w-2xl rounded-3xl border border-white/80 bg-white/75 p-8 text-center shadow-[0_30px_80px_-55px_rgba(15,23,42,0.5)] backdrop-blur md:p-12">
         <p className="text-xs font-medium tracking-[0.22em] text-slate-500 uppercase">
-          Pildora AI Studio
+          Pildora
         </p>
         <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-900 md:text-5xl">
-          Build and test intelligent agents in one place
+          Agentic Apps
         </h1>
         <p className="mt-4 text-sm text-slate-600 md:text-base">
-          Explore practical examples and start chatting with the simple agent
-          immediately.
+          Joaquín Carbonell.
         </p>
 
         <div className="mt-8 flex justify-center">
@@ -29,7 +28,7 @@ export function LandingPage() {
             className="border-orange-200 bg-orange-500 px-6 text-white hover:bg-orange-600"
           >
             <Link to="/agents/introduction">
-              Start
+              Empezar
               <ArrowRight className="size-4" />
             </Link>
           </Button>
